@@ -128,7 +128,6 @@ class CarController():
       self.SC = Spdctrl()
     
     self.model_speed = 0
-    self.model_speed2 = 0
 
     self.dRel = 0
     self.yRel = 0
@@ -204,7 +203,7 @@ class CarController():
 
     param = self.p
 
-    self.model_speed2 = self.SC.calc_va(sm, CS.out.vEgo)
+    self.model_speed = self.SC.calc_va(sm, CS.out.vEgo)
 
     plan = sm['longitudinalPlan']
     self.dRel = int(plan.dRel1) #EON Lead
@@ -222,7 +221,7 @@ class CarController():
     self.outScale = lateral_plan.outputScale
     self.vCruiseSet = lateral_plan.vCruiseSet
     
-    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0005, 0.015], [255, 30])
+    #self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0005, 0.015], [255, 30])
 
     if CS.out.vEgo > 8:
       if self.variable_steer_max:
@@ -364,7 +363,7 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    str_log1 = 'CV={:03.0f}  CVA={:03.0f}  TQ={:03.0f}  R={:03.0f}  ST={:03.0f}/{:01.0f}/{:01.0f}'.format(abs(self.model_speed), abs(self.model_speed2), abs(new_steer), self.timer1.sampleTime(), self.steerMax, self.steerDeltaUp, self.steerDeltaDown)
+    str_log1 = 'CV={:03.0f}  TQ={:03.0f}  R={:03.0f}  ST={:03.0f}/{:01.0f}/{:01.0f}'.format(abs(self.model_speed), abs(new_steer), self.timer1.sampleTime(), self.steerMax, self.steerDeltaUp, self.steerDeltaDown)
 
     if int(self.params.get('OpkrLiveTune')) == 1:
       if int(self.params.get('LateralControlMethod')) == 0:
