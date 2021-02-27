@@ -203,7 +203,7 @@ class CarController():
 
     param = self.p
 
-    self.model_speed = self.SC.calc_va(sm, CS.out.vEgo)
+    self.model_speed = 255 - self.SC.calc_va(sm, CS.out.vEgo)
 
     plan = sm['longitudinalPlan']
     self.dRel = int(plan.dRel1) #EON Lead
