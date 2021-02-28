@@ -221,7 +221,7 @@ class CarController():
     self.outScale = lateral_plan.outputScale
     self.vCruiseSet = lateral_plan.vCruiseSet
     
-    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0005, 0.015], [255, 30])
+    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
 
     if CS.out.vEgo > 8:
       if self.variable_steer_max:
