@@ -233,7 +233,10 @@ def thermald_thread():
   env = dict(os.environ)
   env['LD_LIBRARY_PATH'] = mediaplayer
 
-  getoff_alert = Params().get('OpkrEnableGetoffAlert') == b'1'
+  getoff_alert = params.get('OpkrEnableGetoffAlert') == b'1'
+
+  hotspot_on_boot = params.get('OpkrHotspotOnBoot') == b'1'
+  hotspot_run = False
 
   if int(params.get('OpkrAutoShutdown')) == 0:
     opkrAutoShutdown = 0
@@ -486,6 +489,11 @@ def thermald_thread():
       os.system("cd /data/openpilot; touch prebuilt")
     elif os.path.isfile(prebuiltfile) and not prebuiltlet:
       os.system("cd /data/openpilot; rm -f prebuilt")
+
+    # opkr hotspot
+    if hotspot_on_boot and not hotspot_run and sec_since_boot() > 60:
+      os.system("service call wifi 37 i32 0 i32 1 &")
+      hotspot_run = True
 
     # Offroad power monitoring
     power_monitor.calculate(pandaState)

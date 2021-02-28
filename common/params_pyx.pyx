@@ -147,6 +147,7 @@ keys = {
   b"OpkrTurnSteeringDisable": [TxType.PERSISTENT],
   b"CarModel": [TxType.PERSISTENT],
   b"OpkrSafetyCamera": [TxType.PERSISTENT],
+  b"OpkrHotspotOnBoot": [TxType.PERSISTENT],
 }
 
 def ensure_bytes(v):

@@ -63,3 +63,4 @@ OpkrLiveTune:0
 OpkrDrivingRecord:0
 OpkrTurnSteeringDisable:0
 CarModel:
+OpkrHotspotOnBoot:0
