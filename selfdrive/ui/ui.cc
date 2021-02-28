@@ -160,7 +160,7 @@ static void update_sockets(UIState *s) {
     scene.car_state = sm["carState"].getCarState();
     auto data = sm["carState"].getCarState();
     if(scene.leftBlinker!=data.getLeftBlinker() || scene.rightBlinker!=data.getRightBlinker()){
-      scene.blinker_blinkingrate = 50;
+      scene.blinker_blinkingrate = 120;
     }
     scene.brakePress = data.getBrakePressed();
     scene.brakeLights = data.getBrakeLights();

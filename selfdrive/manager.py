@@ -586,7 +586,7 @@ def main():
     ("LqrKi", "10"),
     ("DcGain", "30"),
     ("IgnoreZone", "1"),
-    ("PidKp", "25"),
+    ("PidKp", "30"),
     ("PidKi", "50"),
     ("PidKd", "50"),
     ("PidKf", "5"),
