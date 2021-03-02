@@ -189,7 +189,7 @@ class SpdctrlRelaxed(SpdController):
             elif CS.clu_Vanz > 40 and lead_objspd < 0 and (int(CS.clu_Vanz)-1) <= int(CS.VSetDis) and int(CS.clu_Vanz) >= dRel*2 and 1 < dRel < 149: # 유지거리 범위 외 감속 조건 앞차 감속중 현재속도/2 아래로 거리 좁혀졌을 때 상대속도에 따라 점진적 감소
                 self.seq_step_debug = "SS>VS,v>40,-1"
                 lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, max(15, 50+(lead_objspd*2)), -1)
-            elif 60 > CS.clu_Vanz > 30 and lead_objspd < 0 and (int(CS.clu_Vanz)-1) <= int(CS.VSetDis) and 1 < dRel < 149:
+            elif 60 > CS.clu_Vanz > 30 and lead_objspd < 0 and (int(CS.clu_Vanz)-1) <= int(CS.VSetDis) and int(CS.clu_Vanz) >= dRel*0.8 and 1 < dRel < 149:
                 self.seq_step_debug = "SS>VS,60>v>30,-1"
                 lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, max(15, 100+(lead_objspd*3.6*10)), -1)
             elif 7 < int(CS.clu_Vanz) < 30 and lead_objspd < 0 and CS.VSetDis > 30:
@@ -231,19 +231,19 @@ class SpdctrlRelaxed(SpdController):
             if model_speed < 60 and CS.clu_Vanz > 40 and CS.lead_distance >= 15:
                 set_speed = self.cruise_set_speed_kph - int(CS.clu_Vanz * 0.275)
                 self.seq_step_debug = "커브감속-4"
-                wait_time_cmd = 70
+                wait_time_cmd = 30
             elif model_speed < 70 and CS.clu_Vanz > 40 and CS.lead_distance >= 15:
                 set_speed = self.cruise_set_speed_kph - int(CS.clu_Vanz * 0.225)
                 self.seq_step_debug = "커브감속-3"
-                wait_time_cmd = 80
+                wait_time_cmd = 50
             elif model_speed < 80 and CS.clu_Vanz > 40 and CS.lead_distance >= 15:
                 set_speed = self.cruise_set_speed_kph - int(CS.clu_Vanz * 0.175)
                 self.seq_step_debug = "커브감속-2"
-                wait_time_cmd = 90
+                wait_time_cmd = 70
             elif model_speed < 90 and CS.clu_Vanz > 40 and CS.lead_distance >= 15:
                 set_speed = self.cruise_set_speed_kph - int(CS.clu_Vanz * 0.125)
                 self.seq_step_debug = "커브감속-1"
-                wait_time_cmd = 100
+                wait_time_cmd = 90
 
         return wait_time_cmd, set_speed
 
