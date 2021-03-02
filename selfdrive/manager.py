@@ -588,7 +588,7 @@ def main():
     ("IgnoreZone", "1"),
     ("PidKp", "30"),
     ("PidKi", "50"),
-    ("PidKd", "50"),
+    ("PidKd", "150"),
     ("PidKf", "5"),
     ("CameraOffsetAdj", "60"),
     ("SteerRatioAdj", "150"),
