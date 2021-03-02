@@ -330,6 +330,7 @@ class LateralPlanner():
     plan_send.lateralPlan.outputScale = self.output_scale
     plan_send.lateralPlan.vCruiseSet = self.v_cruise_kph
     plan_send.lateralPlan.vCurvature = float(sm['controlsState'].curvature)
+    plan_send.lateralPlan.steerAngleDesireDeg = float(sm['controlsState'].steeringAngleDesiredDeg)
 
     if self.stand_still:
       self.standstill_elapsed_time += DT_MDL
