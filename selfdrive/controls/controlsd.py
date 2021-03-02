@@ -325,7 +325,7 @@ class Controls:
       elif CS.cruiseButtons == Buttons.RES_ACCEL or CS.cruiseButtons == Buttons.SET_DECEL:
         self.v_cruise_kph = round(CS.cruiseState.speed * CV.MS_TO_KPH)
         self.v_cruise_kph_last = self.v_cruise_kph
-      elif CS.gasPressed and int(Params().get('OpkrVariableCruise')) == 1 and CS.cruiseState.modeSel != 0 and 30 <= self.v_cruise_kph < int(round(CS.vEgo*CV.MS_TO_KPH)):
+      elif CS.gasPressed and CS.cruiseAccStatus and int(Params().get('OpkrVariableCruise')) == 1 and 30 <= self.v_cruise_kph < int(round(CS.vEgo*CV.MS_TO_KPH)):
         self.v_cruise_kph = int(round(CS.vEgo*CV.MS_TO_KPH))+1
         self.v_cruise_kph_last = self.v_cruise_kph
 
