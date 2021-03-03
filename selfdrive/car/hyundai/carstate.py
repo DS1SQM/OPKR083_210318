@@ -244,6 +244,7 @@ class CarState(CarStateBase):
       self.mdps11_stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
     
     ret.cruiseAccStatus = cp_scc.vl["SCC12"]['ACCMode'] == 1
+    ret.driverAcc = self.driverOverride == 1
 
     return ret
 

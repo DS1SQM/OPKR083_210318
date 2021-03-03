@@ -155,7 +155,6 @@ class Controls:
     self.prof = Profiler(False)  # off by default
 
     self.hyundai_lkas = self.read_only  #read_only
-    self.acc_status = False
 
   def auto_enable(self, CS):
     if self.state != State.enabled and CS.vEgo >= 15 * CV.KPH_TO_MS and CS.gearShifter == 2 and self.sm['liveCalibration'].calStatus != Calibration.UNCALIBRATED:
@@ -318,27 +317,17 @@ class Controls:
         self.v_cruise_kph = self.v_cruise_kph_last
         if int(CS.vSetDis)-1 > self.v_cruise_kph:
           self.v_cruise_kph = int(CS.vSetDis)
-        if CS.cruiseAccStatus:
-          self.acc_status = True
       elif CS.cruiseButtons == Buttons.RES_ACCEL and int(Params().get('OpkrVariableCruise')) == 1 and CS.cruiseState.modeSel != 0 and 30 <= self.v_cruise_kph_last <= round(CS.vEgo*CV.MS_TO_KPH):
         self.v_cruise_kph = round(CS.vEgo*CV.MS_TO_KPH)
         if int(CS.vSetDis)-1 > self.v_cruise_kph:
           self.v_cruise_kph = int(CS.vSetDis)
-        if CS.cruiseAccStatus:
-          self.acc_status = True
         self.v_cruise_kph_last = self.v_cruise_kph
       elif CS.cruiseButtons == Buttons.RES_ACCEL or CS.cruiseButtons == Buttons.SET_DECEL:
         self.v_cruise_kph = round(CS.cruiseState.speed * CV.MS_TO_KPH)
-        if CS.cruiseAccStatus:
-          self.acc_status = True
         self.v_cruise_kph_last = self.v_cruise_kph
-      elif CS.gasPressed and self.acc_status and int(Params().get('OpkrVariableCruise')) == 1 and 30 <= self.v_cruise_kph < int(round(CS.vEgo*CV.MS_TO_KPH)):
-        self.v_cruise_kph = int(round(CS.vEgo*CV.MS_TO_KPH))+1
+      elif CS.driverAcc and int(Params().get('OpkrVariableCruise')) == 1 and 30 <= self.v_cruise_kph < int(round(CS.vEgo*CV.MS_TO_KPH)):
+        self.v_cruise_kph = int(round(CS.vEgo*CV.MS_TO_KPH))
         self.v_cruise_kph_last = self.v_cruise_kph
-      elif CS.brakePressed or CS.cruiseButtons == Buttons.CANCEL:
-        self.acc_status = False
-    else:
-      self.acc_status = False
 
     # decrease the soft disable timer at every step, as it's reset on
     # entrance in SOFT_DISABLING state
