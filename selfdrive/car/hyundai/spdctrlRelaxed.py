@@ -32,6 +32,8 @@ class SpdctrlRelaxed(SpdController):
         self.target_speed_map_counter = 0
         self.target_speed_map_counter1 = 0
         self.target_speed_map_counter2 = 0
+        self.hesitant_status = False
+        self.hesitant_timer = 0
 
     def update_lead(self, sm, CS, dRel, yRel, vRel):
         self.map_spdlimit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
@@ -179,7 +181,9 @@ class SpdctrlRelaxed(SpdController):
                 lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 15, 1)
             elif lead_objspd > 0 and int(CS.clu_Vanz)+lead_objspd >= int(CS.VSetDis) and int(CS.clu_Vanz*0.4) < dRel < 149 and ((int(round(self.target_speed)) > int(CS.VSetDis) and self.target_speed != 0) or self.target_speed == 0):
                 self.seq_step_debug = "SS>VS,+1"
-                lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 20, 1)
+                if int(CS.VSetDis) > int(CS.clu_Vanz)+14:
+                    self.hesitant_status = True
+                lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 15, 1)
             elif CS.clu_Vanz > 80 and lead_objspd < 0 and (int(CS.clu_Vanz)-1) <= int(CS.VSetDis) and int(CS.clu_Vanz) >= dRel*1.5 and 1 < dRel < 149: # 유지거리 범위 외 감속 조건 앞차 감속중 현재속도/2 아래로 거리 좁혀졌을 때 상대속도에 따라 점진적 감소
                 self.seq_step_debug = "SS>VS,v>80,-1"
                 lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, max(15, 50+(lead_objspd*2)), -1)
@@ -208,6 +212,11 @@ class SpdctrlRelaxed(SpdController):
                 self.seq_step_debug = "출발대기"
             else:
                 self.seq_step_debug = "SS>VS,거리유지"
+            if self.hesitant_status and self.hesitant_timer > 150:
+                self.hesitant_status = False
+                self.hesitant_timer = 0
+            elif self.hesitant_status:
+                self.hesitant_timer += 1
         elif lead_objspd >= 0 and CS.clu_Vanz >= int(CS.VSetDis) and int(CS.clu_Vanz * 0.5) < dRel < 149:
             self.cut_in = False
             self.seq_step_debug = "속도유지"
