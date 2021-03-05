@@ -163,6 +163,7 @@ typedef struct UIScene {
   float radarDistance;
   bool standStill;
   float limitSpeedCamera;
+  float limitSpeedCameraDist;
   float vSetDis;
   bool cruiseAccStatus;
 

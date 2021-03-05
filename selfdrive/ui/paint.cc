@@ -596,16 +596,22 @@ static void ui_draw_vision_event(UIState *s) {
   const int viz_event_x = s->viz_rect.right() - (viz_event_w + bdr_s);
   const int viz_event_y = s->viz_rect.y + (bdr_s);
 
-  //if (s->scene.limitSpeedCamera > 29) {
-  if (true) {
-    const int img_speedlimit_size = 350;
-    const int img_speedlimit_x = s->viz_rect.centerX() - img_speedlimit_size/2;
-    const int img_speedlimit_y = s->viz_rect.centerY() - img_speedlimit_size/2;
-    float img_speedlimit_alpha = 0.3f;
+  if (s->scene.limitSpeedCamera > 29) {
+    int img_speedlimit_growing_size_init = 0;
+    int img_speedlimit_growing_size = 0;
+    int img_speedlimit_size = 0;
+    int img_speedlimit_x = 0;
+    int img_speedlimit_y = 0;
+    img_speedlimit_growing_size_init = (s->scene.limitSpeedCameraDist>600?600:s->scene.limitSpeedCameraDist);
+    img_speedlimit_growing_size = 601 - img_speedlimit_growing_size_init;
+
+    img_speedlimit_size = img_speedlimit_growing_size;
+    img_speedlimit_x = s->viz_rect.centerX() - img_speedlimit_size/2;
+    img_speedlimit_y = s->viz_rect.centerY() - img_speedlimit_size/2;
+    float img_speedlimit_alpha = 0.2f;
     if (s->scene.limitSpeedCamera < 40) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_30", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 50) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_40", img_speedlimit_alpha);}
-    //else if (s->scene.limitSpeedCamera < 60) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
-    else if (true) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 60) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 70) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_60", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 80) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_70", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 90) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_80", img_speedlimit_alpha);}

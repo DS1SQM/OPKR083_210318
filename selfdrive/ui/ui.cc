@@ -155,6 +155,7 @@ static void update_sockets(UIState *s) {
     s->scene.alertTextMsg2 = scene.controls_state.getAlertTextMsg2(); //debug2
 
     s->scene.limitSpeedCamera = scene.controls_state.getLimitSpeedCamera();
+    s->scene.limitSpeedCameraDist = scene.controls_state.getLimitSpeedCameraDist();
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();

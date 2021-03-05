@@ -301,7 +301,9 @@ class Planner():
       self.target_speed_map_sign = True
     elif self.target_speed_map > 29 and self.target_speed_map_sign:
       longitudinalPlan.targetSpeedCamera = self.target_speed_map
+      longitudinalPlan.targetSpeedCameraDist = self.target_speed_map_dist
     else:
       longitudinalPlan.targetSpeedCamera = 0
+      longitudinalPlan.targetSpeedCameraDist = 0
 
     pm.send('longitudinalPlan', plan_send)

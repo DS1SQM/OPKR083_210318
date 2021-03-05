@@ -527,6 +527,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   alertTextMsg2  @61 :Text;
   lateralControlMethod  @62 :UInt8;
   limitSpeedCamera @63 :Float32;
+  limitSpeedCameraDist @64 :Float32;
 
   lateralControlState :union {
     indiState @52 :LateralINDIState;
@@ -749,6 +750,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   status2 @38 :Bool;
   targetSpeed @39 :Float32;
   targetSpeedCamera @40 :Float32;
+  targetSpeedCameraDist @41 :Float32;
 
   enum LongitudinalPlanSource {
     cruise @0;

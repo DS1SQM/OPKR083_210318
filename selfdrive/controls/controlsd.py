@@ -551,6 +551,7 @@ class Controls:
     controlsState.alertTextMsg1 = self.log_alertTextMsg1
     controlsState.alertTextMsg2 = self.log_alertTextMsg2
     controlsState.limitSpeedCamera = self.sm['longitudinalPlan'].targetSpeedCamera
+    controlsState.limitSpeedCameraDist = self.sm['longitudinalPlan'].targetSpeedCameraDist
     controlsState.lateralControlMethod = self.lateral_control_method
 
     if self.CP.lateralTuning.which() == 'pid':
