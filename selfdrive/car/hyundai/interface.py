@@ -137,7 +137,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiV = [0.02, PidKi]
       ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [PidKd]
-      ret.lateralTuning.pid.newKfTuned = False # set "True" to use Shane's feedforward
+      ret.lateralTuning.pid.newKfTuned = True if int(params.get('UserOption2')) == 1 else False # Shane's feedforward
     elif int(params.get('LateralControlMethod')) == 1:
       ret.lateralTuning.init('indi')
       ret.lateralTuning.indi.innerLoopGainBP = [0., 9.]
