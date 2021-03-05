@@ -601,7 +601,7 @@ static void ui_draw_vision_event(UIState *s) {
     const int img_speedlimit_size = 350;
     const int img_speedlimit_x = s->viz_rect.centerX() - img_speedlimit_size/2;
     const int img_speedlimit_y = s->viz_rect.centerY() - img_speedlimit_size/2;
-    float img_speedlimit_alpha = 0.5f;
+    float img_speedlimit_alpha = 0.3f;
     if (s->scene.limitSpeedCamera < 40) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_30", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 50) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_40", img_speedlimit_alpha);}
     //else if (s->scene.limitSpeedCamera < 60) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
