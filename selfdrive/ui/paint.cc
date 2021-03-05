@@ -413,6 +413,7 @@ static void ui_draw_debug(UIState *s)
     //ui_print(s, ui_viz_rx, ui_viz_ry+400, "AD:%.2f", scene.lateralPlan.steerActuatorDelay);
     ui_print(s, ui_viz_rx, ui_viz_ry+400, "SC:%.2f", scene.lateralPlan.steerRateCost);
     ui_print(s, ui_viz_rx, ui_viz_ry+450, "OS:%.2f", abs(scene.output_scale));
+    if (s->scene.controls_state.getEngageable()){ui_print(s, ui_viz_rx, ui_viz_ry+500, "EN");}
     nvgFontSize(s->vg, 40);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     if (s->lat_control == 0) {
@@ -595,37 +596,30 @@ static void ui_draw_vision_event(UIState *s) {
   const int viz_event_x = s->viz_rect.right() - (viz_event_w + bdr_s);
   const int viz_event_y = s->viz_rect.y + (bdr_s);
 
+  //if (s->scene.limitSpeedCamera > 29) {
+  if (true) {
+    const int img_speedlimit_size = 350;
+    const int img_speedlimit_x = s->viz_rect.centerX() - img_speedlimit_size/2;
+    const int img_speedlimit_y = s->viz_rect.centerY() - img_speedlimit_size/2;
+    float img_speedlimit_alpha = 0.5f;
+    if (s->scene.limitSpeedCamera < 40) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_30", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 50) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_40", img_speedlimit_alpha);}
+    //else if (s->scene.limitSpeedCamera < 60) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
+    else if (true) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 70) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_60", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 80) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_70", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 90) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_80", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 100) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_90", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 110) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_100", img_speedlimit_alpha);}
+    else if (s->scene.limitSpeedCamera < 120) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_110", img_speedlimit_alpha);}
+  }
+
   // draw steering wheel
   const int bg_wheel_size = 90;
   const int bg_wheel_x = viz_event_x + (viz_event_w-bg_wheel_size);
   const int bg_wheel_y = viz_event_y + (bg_wheel_size/2);
   const NVGcolor color = bg_colors[s->status];
-
-  if (s->scene.limitSpeedCamera > 29) {
-    const int img_x = s->viz_rect.x + bdr_s + 390;
-    const int img_y = viz_event_y;
-    const int img_x_size = 172*1.5;
-    const int img_y_size = 271*1.5;
-    float img_turn_alpha = 0.7f;
-    ui_draw_image(s, {img_x, img_y, img_x_size, img_y_size}, "safetycam", img_turn_alpha);
-  }
-
-  //if (s->scene.controls_state.getEngageable()){
-  if (s->scene.limitSpeedCamera > 29) {
-    const int img_turn_size = 180;
-    const int img_turn_x = viz_event_x-(img_turn_size/4)+85;
-    const int img_turn_y = viz_event_y;
-    float img_turn_alpha = 0.7f;
-    if ((29 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 40)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_30", img_turn_alpha);}
-    else if ((39 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 50)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_40", img_turn_alpha);}
-    else if ((49 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 60)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_50", img_turn_alpha);}
-    else if ((59 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 70)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_60", img_turn_alpha);}
-    else if ((69 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 80)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_70", img_turn_alpha);}
-    else if ((79 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 90)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_80", img_turn_alpha);}
-    else if ((89 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 100)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_90", img_turn_alpha);}
-    else if ((99 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 110)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_100", img_turn_alpha);}
-    else if ((109 < s->scene.limitSpeedCamera) && (s->scene.limitSpeedCamera < 120)) {ui_draw_image(s, {img_turn_x, img_turn_y, img_turn_size, img_turn_size}, "speed_110", img_turn_alpha);}
-  } else if (s->scene.controls_state.getEnabled()){
+  if (s->scene.controls_state.getEnabled()){
     float angleSteers = s->scene.car_state.getSteeringAngleDeg();
     ui_draw_circle_image(s, bg_wheel_x, bg_wheel_y+20, bg_wheel_size, "wheel", color, 1.0f, angleSteers);
   } else {
@@ -1314,7 +1308,6 @@ void ui_nvg_init(UIState *s) {
       {"network_3", "../assets/images/network_3.png"},
       {"network_4", "../assets/images/network_4.png"},
       {"network_5", "../assets/images/network_5.png"},
-      {"safetycam", "../assets/img_safetycam.png"},
       {"speed_30", "../assets/img_30_speedahead.png"},
       {"speed_40", "../assets/img_40_speedahead.png"},
       {"speed_50", "../assets/img_50_speedahead.png"},
