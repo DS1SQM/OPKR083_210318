@@ -158,18 +158,17 @@ def check_car_battery_voltage(should_start, pandaState, charging_disabled, msg):
   #   - onroad isn't started
   print(pandaState)
   
-  if charging_disabled and (pandaState is None or pandaState.pandaState.voltage > (11800+500)) and msg.deviceState.batteryPercent < battery_charging_min:
+  if not battery_charging_control:
+    charging_disabled = False
+  elif charging_disabled and msg.deviceState.batteryPercent < battery_charging_min:
     charging_disabled = False
     os.system('echo "1" > /sys/class/power_supply/battery/charging_enabled')
-  elif not charging_disabled and (msg.deviceState.batteryPercent > battery_charging_max or (pandaState is not None and pandaState.pandaState.voltage < 11800 and not should_start)):
+  elif not charging_disabled and msg.deviceState.batteryPercent > battery_charging_max:
     charging_disabled = True
     os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
   elif msg.deviceState.batteryCurrent < 0 and msg.deviceState.batteryPercent > battery_charging_max:
     charging_disabled = True
     os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
-    
-  if not battery_charging_control:
-    charging_disabled = False
 
   return charging_disabled
 
