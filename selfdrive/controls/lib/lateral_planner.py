@@ -103,6 +103,16 @@ class LateralPlanner():
     self.steerRatio_to_send = 0
     self.stand_still = False
 
+  # Atom's steer angle limitation
+  def limit_ctrl(self, value, limit, offset ):
+      p_limit = offset + limit
+      m_limit = offset - limit
+      if value > p_limit:
+          value = p_limit
+      elif  value < m_limit:
+          value = m_limit
+      return value
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -284,6 +294,13 @@ class LateralPlanner():
     # negative sign, controls uses different convention
     self.desired_steering_wheel_angle_deg = -float(math.degrees(curvature_desired * VM.sR)/curvature_factor) + steering_wheel_angle_offset_deg
     self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
+
+    # Atom's steer angle limitation
+    if v_ego < 10 and int(Params().get('UserOption3')) == 1: # 36km/h
+      xp = [4,10]  # 14.4km/h ~ 36km/h
+      fp2 = [1,5]  # 1도 ~ 5도
+      limit_steers = interp(v_ego, xp, fp2)
+      self.desired_steering_wheel_angle_deg = self.limit_ctrl(self.desired_steering_wheel_angle_deg, limit_steers, sm['carState'].steeringAngleDeg)
 
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution.curvature)
