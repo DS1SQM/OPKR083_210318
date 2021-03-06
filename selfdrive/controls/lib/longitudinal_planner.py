@@ -295,9 +295,11 @@ class Planner():
     consider_speed = interp((self.vego*CV.MS_TO_KPH - self.target_speed_map), [10, 30], [1, 1.3])
     if self.target_speed_map > 29 and self.target_speed_map_dist < cam_distance_calc*consider_speed*self.vego*CV.MS_TO_KPH:
       longitudinalPlan.targetSpeedCamera = self.target_speed_map
+      longitudinalPlan.targetSpeedCameraDist = self.target_speed_map_dist
       self.target_speed_map_sign = True
     elif self.target_speed_map > 29 and self.target_speed_map_dist >= cam_distance_calc*consider_speed*self.vego*CV.MS_TO_KPH and self.target_speed_map_block:
       longitudinalPlan.targetSpeedCamera = self.target_speed_map
+      longitudinalPlan.targetSpeedCameraDist = self.target_speed_map_dist
       self.target_speed_map_sign = True
     elif self.target_speed_map > 29 and self.target_speed_map_sign:
       longitudinalPlan.targetSpeedCamera = self.target_speed_map
