@@ -413,7 +413,6 @@ static void ui_draw_debug(UIState *s)
     //ui_print(s, ui_viz_rx, ui_viz_ry+400, "AD:%.2f", scene.lateralPlan.steerActuatorDelay);
     ui_print(s, ui_viz_rx, ui_viz_ry+400, "SC:%.2f", scene.lateralPlan.steerRateCost);
     ui_print(s, ui_viz_rx, ui_viz_ry+450, "OS:%.2f", abs(scene.output_scale));
-    if (s->scene.controls_state.getEngageable()){ui_print(s, ui_viz_rx, ui_viz_ry+500, "EN");}
     nvgFontSize(s->vg, 40);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     if (s->lat_control == 0) {
@@ -602,14 +601,14 @@ static void ui_draw_vision_event(UIState *s) {
     int img_speedlimit_size = 0;
     int img_speedlimit_x = 0;
     int img_speedlimit_y = 0;
-    img_speedlimit_growing_size_init = (s->scene.limitSpeedCameraDist>700?700:s->scene.limitSpeedCameraDist);
-    img_speedlimit_growing_size = 701 - img_speedlimit_growing_size_init;
-    if (s->scene.limitSpeedCameraDist > 700) {img_speedlimit_growing_size = 300;}
+    img_speedlimit_growing_size_init = (s->scene.limitSpeedCameraDist>600?600:s->scene.limitSpeedCameraDist);
+    img_speedlimit_growing_size = 601 - img_speedlimit_growing_size_init;
+    if (s->scene.limitSpeedCameraDist > 600) {img_speedlimit_growing_size = 300;}
     img_speedlimit_size = img_speedlimit_growing_size;
     img_speedlimit_x = s->viz_rect.centerX() - img_speedlimit_size/2;
     img_speedlimit_y = s->viz_rect.centerY() - img_speedlimit_size/2;
     float img_speedlimit_alpha = 0.35f;
-    if(s->scene.car_state.getVEgo()*3.6 < 1 || s->scene.limitSpeedCameraDist > 700) {img_speedlimit_alpha = 0.1f;}
+    if(s->scene.car_state.getVEgo()*3.6 < 1 || s->scene.limitSpeedCameraDist > 600) {img_speedlimit_alpha = 0.1f;}
     if (s->scene.limitSpeedCamera < 40) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_30", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 50) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_40", img_speedlimit_alpha);}
     else if (s->scene.limitSpeedCamera < 60) {ui_draw_image(s, {img_speedlimit_x, img_speedlimit_y, img_speedlimit_size, img_speedlimit_size}, "speed_50", img_speedlimit_alpha);}

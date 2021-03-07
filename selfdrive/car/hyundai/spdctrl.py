@@ -34,6 +34,7 @@ class Spdctrl(SpdController):
         self.target_speed_map_counter2 = 0
         self.hesitant_status = False
         self.hesitant_timer = 0
+        self.map_decel_only = int(Params().get("UserOption4", encoding='utf8')) == 1
 
     def update_lead(self, sm, CS, dRel, yRel, vRel):
         self.map_spdlimit_offset = int(Params().get("OpkrSpeedLimitOffset", encoding='utf8'))
@@ -101,7 +102,7 @@ class Spdctrl(SpdController):
         else:
             d_delta2 = 0
  
-        if CS.driverAcc_time: #운전자가 가속페달 밟으면 크루즈 설정속도를 현재속도+1로 동기화
+        if CS.driverAcc_time and not self.map_decel_only: #운전자가 가속페달 밟으면 크루즈 설정속도를 현재속도+1로 동기화
             if int(CS.VSetDis) < int(round(CS.clu_Vanz)):
               lead_set_speed = int(round(CS.clu_Vanz)) + 1
               self.seq_step_debug = "운전자가속"
@@ -110,7 +111,7 @@ class Spdctrl(SpdController):
             self.seq_step_debug = "맵기반감속"
             lead_wait_cmd, lead_set_speed = self.get_tm_speed(CS, 8, -1)
         # 거리 유지 조건
-        elif d_delta < 0 or d_delta2 < 0: # 기준유지거리(현재속도*0.4)보다 가까이 있게 된 상황
+        elif d_delta < 0 or d_delta2 < 0 and not self.map_decel_only: # 기준유지거리(현재속도*0.4)보다 가까이 있게 된 상황
             if (int(CS.clu_Vanz)-1) <= int(CS.VSetDis) and dRele - dRelef > 3 and lead2_status:
                 self.seq_step_debug = "끼어들기감지"
                 #lead_wait_cmd, lead_set_speed = self.get_tm_speed(CS, 15, -5)
@@ -151,7 +152,7 @@ class Spdctrl(SpdController):
                 self.seq_step_debug = "거리유지"
                 self.cut_in = False
         # 선행차량이 멀리 있는 상태에서 감속 조건
-        elif 20 <= dRel < 149 and lead_objspd < -20: #정지 차량 및 급감속 차량 발견 시
+        elif 20 <= dRel < 149 and lead_objspd < -20 and not self.map_decel_only: #정지 차량 및 급감속 차량 발견 시
             self.cut_in = False
             if dRel >= 50:
                 self.seq_step_debug = "정차차량 감속"
@@ -159,7 +160,7 @@ class Spdctrl(SpdController):
             elif dRel >= 30:
                 self.seq_step_debug = "정차차량 감속"
                 lead_wait_cmd, lead_set_speed = self.get_tm_speed(CS, 20, -10)
-        elif self.cruise_set_speed_kph > int(round((CS.clu_Vanz))):  #이온설정속도가 차량속도보다 큰경우
+        elif self.cruise_set_speed_kph > int(round((CS.clu_Vanz))) and not self.map_decel_only:  #이온설정속도가 차량속도보다 큰경우
             self.cut_in = False
             if 10 > dRel > 3 and lead_objspd <= 0 and 1 < int(CS.clu_Vanz) <= 7 and CS.VSetDis < 45 and ((int(round(self.target_speed)) > int(CS.VSetDis) and self.target_speed != 0) or self.target_speed == 0):
                 self.seq_step_debug = "출발속도조정"
@@ -217,13 +218,16 @@ class Spdctrl(SpdController):
                 self.hesitant_timer = 0
             elif self.hesitant_status:
                 self.hesitant_timer += 1
-        elif lead_objspd >= 0 and CS.clu_Vanz >= int(CS.VSetDis) and int(CS.clu_Vanz * 0.5) < dRel < 149:
+        elif lead_objspd >= 0 and CS.clu_Vanz >= int(CS.VSetDis) and int(CS.clu_Vanz * 0.5) < dRel < 149 and not self.map_decel_only:
             self.cut_in = False
             self.seq_step_debug = "속도유지"
-        elif lead_objspd < 0 and int(CS.clu_Vanz * 0.5) >= dRel > 1:
+        elif lead_objspd < 0 and int(CS.clu_Vanz * 0.5) >= dRel > 1 and not self.map_decel_only:
             self.cut_in = False
             self.seq_step_debug = "일반감속,-1"
             lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 50, -1)
+        elif self.map_decel_only and self.cruise_set_speed_kph > int(round(CS.VSetDis)) and ((int(round(self.target_speed)) > int(CS.VSetDis) and self.target_speed != 0) or self.target_speed == 0):
+            self.seq_step_debug = "속도원복"
+            lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 10, 1)
         else:
             self.cut_in = False
             self.seq_step_debug = "속도유지"
@@ -236,7 +240,7 @@ class Spdctrl(SpdController):
 
         # 2. 커브 감속.
         #if self.cruise_set_speed_kph >= 100:
-        if CS.out.cruiseState.modeSel == 1 and Events().names not in [EventName.laneChangeManual, EventName.laneChange]:
+        if CS.out.cruiseState.modeSel == 1 and Events().names not in [EventName.laneChangeManual, EventName.laneChange] and not self.map_decel_only:
             if model_speed < 60 and CS.clu_Vanz > 40 and CS.lead_distance >= 15:
                 set_speed = self.cruise_set_speed_kph - int(CS.clu_Vanz * 0.2)
                 self.seq_step_debug = "커브감속-4"

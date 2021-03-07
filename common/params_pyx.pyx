@@ -134,7 +134,6 @@ keys = {
   b"OpkrBlindSpotDetect": [TxType.PERSISTENT],
   b"OpkrMaxAngleLimit": [TxType.PERSISTENT],
   b"OpkrAutoResumeOption": [TxType.PERSISTENT],
-  b"OpkrAngleOffsetSelect": [TxType.PERSISTENT],
   b"OpkrSpeedLimitOffset": [TxType.PERSISTENT],
   b"LimitSetSpeedCamera": [TxType.PERSISTENT],
   b"LimitSetSpeedCameraDist": [TxType.PERSISTENT],
