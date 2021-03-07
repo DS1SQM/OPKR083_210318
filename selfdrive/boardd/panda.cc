@@ -17,12 +17,12 @@ void panda_set_power(bool power){
   err += gpio_init(GPIO_STM_RST_N, true);
   err += gpio_init(GPIO_STM_BOOT0, true);
 
-  err += gpio_set(GPIO_STM_RST_N, true);
+  err += gpio_set(GPIO_STM_RST_N, false);
   err += gpio_set(GPIO_STM_BOOT0, false);
 
   util::sleep_for(100); // 100 ms
 
-  err += gpio_set(GPIO_STM_RST_N, !power);
+  err += gpio_set(GPIO_STM_RST_N, power);
   assert(err == 0);
 #endif
 }
@@ -182,9 +182,9 @@ void Panda::set_safety_model(cereal::CarParams::SafetyModel safety_model, int sa
   usb_write(0xdc, (uint16_t)safety_model, safety_param);
 }
 
-void Panda::set_unsafe_mode(uint16_t unsafe_mode) {
-  usb_write(0xdf, unsafe_mode, 0);
-}
+//void Panda::set_unsafe_mode(uint16_t unsafe_mode) {
+//  usb_write(0xdf, unsafe_mode, 0);
+//}
 
 cereal::PandaState::PandaType Panda::get_hw_type() {
   unsigned char hw_query[1] = {0};
