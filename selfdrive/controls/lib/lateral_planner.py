@@ -282,7 +282,7 @@ class LateralPlanner():
     next_curvature = current_curvature + 2*curvature_diff_from_psi
 
     # reset to current steer angle if not active or overriding
-    if active and v_ego > 9:  # modified by opkr to find out what difference is. It works above 9m/s(32.4km/h)
+    if active:
       curvature_desired = next_curvature
       desired_curvature_rate = next_curvature_rate
     else:
