@@ -484,7 +484,7 @@ void pigeon_thread() {
       if (recv[0] == (char)0x00){
         if (ignition) {
           LOGW("received invalid ublox message while onroad, resetting panda GPS");
-          need_reset = false;
+          need_reset = true;
         }
       } else {
         pigeon_publish_raw(pm, recv);
