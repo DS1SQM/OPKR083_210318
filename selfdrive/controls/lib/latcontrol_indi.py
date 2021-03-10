@@ -95,9 +95,8 @@ class LatControlINDI():
     self.outer_loop_gain = interp(self.speed, self._outer_loop_gain[0], self._outer_loop_gain[1])
     self.inner_loop_gain = interp(self.speed, self._inner_loop_gain[0], self._inner_loop_gain[1])
 
-    if self.params.get("OpkrLiveTune", encoding='utf8') is not None:
-      if int(self.params.get("OpkrLiveTune", encoding='utf8')) == 1:
-        self.live_tune(CP)
+    if self.params.get('OpkrLiveTune') == b'1':
+      self.live_tune(CP)
 
     # Update Kalman filter
     y = np.array([[math.radians(CS.steeringAngleDeg)], [math.radians(CS.steeringRateDeg)]])
