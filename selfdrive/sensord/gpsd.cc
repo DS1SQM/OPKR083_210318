@@ -58,8 +58,8 @@ void location_callback(GpsLocation* location) {
   locationData.setLongitude(location->longitude);
   locationData.setAltitude(location->altitude);
   locationData.setSpeed(location->speed);
-  locationData.setBearing(location->bearing);
-  locationData.setAccuracy(location->accuracy);
+  locationData.setBearingDeg(location->bearing);
+  locationData.setBearingAccuracyDeg(location->accuracy);
   locationData.setTimestamp(location->timestamp);
   locationData.setSource(cereal::GpsLocationData::SensorSource::ANDROID);
 
