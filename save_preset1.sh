@@ -15,5 +15,5 @@ fi
 do
 ParamName=$(/data/data/com.termux/files/usr/bin/echo -n $line | /data/data/com.termux/files/usr/bin/applets/awk -F ':' '{print $1}')
 ParamValue=$(/data/data/com.termux/files/usr/bin/cat /data/params/d/${ParamName})
-/data/data/com.termux/files/usr/bin/echo -n "$ParamName:$ParamValue" >> /data/preset1
+/data/data/com.termux/files/usr/bin/echo "$ParamName:$ParamValue" >> /data/preset1
 done
