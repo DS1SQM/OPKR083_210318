@@ -59,8 +59,9 @@ class LatControlLQR():
     return self.sat_count > self.sat_limit
 
   def update(self, active, CS, CP, lat_plan):
-    if int(self.params.get("OpkrLiveTune", encoding='utf8')) == 1:
-      self.live_tune(CP)
+    if self.params.get("OpkrLiveTune", encoding='utf8') is not None:
+      if int(self.params.get("OpkrLiveTune", encoding='utf8')) == 1:
+        self.live_tune(CP)
 
     lqr_log = log.ControlsState.LateralLQRState.new_message()
 
