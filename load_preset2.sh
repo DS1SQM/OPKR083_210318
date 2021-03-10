@@ -12,4 +12,6 @@ do
 ParamName=$(/data/data/com.termux/files/usr/bin/echo -n $line | /data/data/com.termux/files/usr/bin/applets/awk -F ':' '{print $1}')
 ParamValue=$(/data/data/com.termux/files/usr/bin/echo -n $line | /data/data/com.termux/files/usr/bin/applets/awk -F ':' '{print $2}')
 /data/data/com.termux/files/usr/bin/echo -n $ParamValue > /data/params/d/${ParamName}
+/data/data/com.termux/files/usr/bin/chown root:root /data/params/d/${ParamName}
+/data/data/com.termux/files/usr/bin/chmod 666 /data/params/d/${ParamName}
 done
