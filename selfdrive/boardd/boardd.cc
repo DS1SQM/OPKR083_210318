@@ -188,10 +188,13 @@ static bool usb_retry_connect() {
 }
 
 void can_recv(PubMaster &pm) {
-  kj::Array<capnp::word> can_data;
-  panda->can_receive(can_data);
-  auto bytes = can_data.asBytes();
-  pm.send("can", bytes.begin(), bytes.size());
+  // create message
+  MessageBuilder msg;
+  auto event = msg.initEvent();
+  int recv = panda->can_receive(event);
+  if (recv){
+    pm.send("can", msg);
+  }
 }
 
 void can_send_thread(bool fake_send) {
