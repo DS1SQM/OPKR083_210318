@@ -405,6 +405,12 @@ void hardware_control_thread() {
 
 #if defined(QCOM) || defined(QCOM2)
     if (sm.updated("deviceState")){
+      // Fan speed
+      uint16_t fan_speed = sm["deviceState"].getDeviceState().getFanSpeedPercentDesired();
+      if (fan_speed != prev_fan_speed || cnt % 100 == 0){
+        panda->set_fan_speed(fan_speed);
+        prev_fan_speed = fan_speed;
+      }
       // Charging mode
       bool charging_disabled = sm["deviceState"].getDeviceState().getChargingDisabled();
       if (charging_disabled != prev_charging_disabled){
@@ -419,17 +425,6 @@ void hardware_control_thread() {
       }
     }
 #endif
-
-    // Other pandas don't have fan/IR to control
-    if (panda->hw_type != cereal::PandaState::PandaType::UNO && panda->hw_type != cereal::PandaState::PandaType::DOS) continue;
-    if (sm.updated("deviceState")){
-      // Fan speed
-      uint16_t fan_speed = sm["deviceState"].getDeviceState().getFanSpeedPercentDesired();
-      if (fan_speed != prev_fan_speed || cnt % 100 == 0){
-        panda->set_fan_speed(fan_speed);
-        prev_fan_speed = fan_speed;
-      }
-    }
     if (sm.updated("driverCameraState")){
       auto event = sm["driverCameraState"];
       int cur_integ_lines = event.getDriverCameraState().getIntegLines();
