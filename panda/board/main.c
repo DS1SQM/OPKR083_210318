@@ -123,21 +123,21 @@ void set_safety_mode(uint16_t mode, int16_t param) {
   }
   switch (mode_copy) {
     case SAFETY_SILENT:
-      set_intercept_relay(true);
+      set_intercept_relay(false);
       if (board_has_obd()) {
         current_board->set_can_mode(CAN_MODE_NORMAL);
       }
       can_silent = ALL_CAN_SILENT;
       break;
     case SAFETY_NOOUTPUT:
-      set_intercept_relay(true);
+      set_intercept_relay(false);
       if (board_has_obd()) {
         current_board->set_can_mode(CAN_MODE_NORMAL);
       }
       can_silent = ALL_CAN_LIVE;
       break;
     case SAFETY_ELM327:
-      set_intercept_relay(true);
+      set_intercept_relay(false);
       heartbeat_counter = 0U;
       if (board_has_obd()) {
         current_board->set_can_mode(CAN_MODE_OBD_CAN2);
@@ -614,10 +614,6 @@ int usb_cb_control_msg(USB_Setup_TypeDef *setup, uint8_t *resp, bool hardwired) 
     case 0xf6:
       siren_enabled = (setup->b.wValue.w != 0U);
       break;
-    // **** 0xf7: set green led enabled
-    case 0xf7:
-      green_led_enabled = (setup->b.wValue.w != 0U);
-      break;
     default:
       puts("NO HANDLER ");
       puth(setup->b.bRequest);
@@ -705,7 +701,7 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
       fan_tick();
 
       // set green LED to be controls allowed
-      current_board->set_led(LED_GREEN, controls_allowed | green_led_enabled);
+      current_board->set_led(LED_GREEN, controls_allowed);
 
       // turn off the blue LED, turned on by CAN
       // unless we are in power saving mode
