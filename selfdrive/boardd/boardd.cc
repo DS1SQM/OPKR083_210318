@@ -393,7 +393,7 @@ void hardware_control_thread() {
   SubMaster sm({"deviceState", "driverCameraState"});
 
   // Other pandas don't have hardware to control
-  if (panda->hw_type != cereal::PandaState::HwType::UNO && panda->hw_type != cereal::PandaState::HwType::DOS) return;
+  if (panda->hw_type != cereal::PandaState::PandaType::UNO && panda->hw_type != cereal::PandaState::PandaType::DOS) return;
 
   uint64_t last_front_frame_t = 0;
   uint16_t prev_fan_speed = 999;
