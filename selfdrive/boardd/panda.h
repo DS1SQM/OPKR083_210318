@@ -52,7 +52,7 @@ class Panda {
   Panda();
   ~Panda();
 
-  std::atomic<bool> connected = true;
+  bool connected = true;
   cereal::PandaState::PandaType hw_type = cereal::PandaState::PandaType::UNKNOWN;
   bool is_pigeon = false;
   bool has_rtc = false;
@@ -66,7 +66,6 @@ class Panda {
   // Panda functionality
   cereal::PandaState::PandaType get_hw_type();
   void set_safety_model(cereal::CarParams::SafetyModel safety_model, int safety_param=0);
-  void set_unsafe_mode(uint16_t unsafe_mode);
   void set_rtc(struct tm sys_time);
   struct tm get_rtc();
   void set_fan_speed(uint16_t fan_speed);
@@ -74,8 +73,8 @@ class Panda {
   void set_ir_pwr(uint16_t ir_pwr);
   health_t get_state();
   void set_loopback(bool loopback);
-  std::optional<std::vector<uint8_t>> get_firmware_version();
-  std::optional<std::string> get_serial();
+  const char* get_firmware_version();
+  const char* get_serial();
   void set_power_saving(bool power_saving);
   void set_usb_power_mode(cereal::PandaState::UsbPowerMode power_mode);
   void send_heartbeat();
