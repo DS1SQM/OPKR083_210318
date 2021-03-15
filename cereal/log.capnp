@@ -524,6 +524,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   lateralControlMethod  @62 :UInt8;
   limitSpeedCamera @63 :Float32;
   limitSpeedCameraDist @64 :Float32;
+  steerRatio @65 :Float32;
 
   lateralControlState :union {
     indiState @52 :LateralINDIState;
@@ -805,8 +806,12 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   curvature @22 :Float32; # rad
   curvatureRate @23 :Float32; # rad/s
 
-  outputScale @26 :Float32;
-  standstillElapsedTime @28 :Float32;
+  outputScale @24 :Float32;
+  steerRateCost @25 :Float32;
+  standstillElapsedTime @26 :Float32;
+  vCruiseSet @27 :Float32;
+  vCurvature @28 :Float32;
+  steerAngleDesireDeg @29 :Float32;
 
   enum Desire {
     none @0;

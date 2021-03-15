@@ -28,16 +28,15 @@ static void ui_set_brightness(UIState *s, int brightness) {
   }
 }
 
-static void handle_display_state(UIState *s, bool awake) {
 static void handle_display_state(UIState *s, FrameBuffer *fb, bool user_input) {
   if (user_input) {
     // 30 second timeout
     s->awake_timeout = (s->nOpkrAutoScreenOff && s->scene.started)? s->nOpkrAutoScreenOff*60*UI_FREQ : 30*UI_FREQ;
   }
-  if (s->awake != awake) {
-    s->awake = awake;
+  if (s->awake != user_input) {
+    s->awake = user_input;
     // TODO: replace command_awake and command_sleep with direct calls to android
-    if (awake) {
+    if (user_input) {
       int display_mode = HWC_POWER_MODE_NORMAL;
       LOGW("setting display mode %d", display_mode);
       s->fb->set_power(display_mode);
@@ -143,21 +142,21 @@ int main(int argc, char* argv[]) {
     ui_update(s);
 
     // manage wakefulness
-    if (s->started || s->ignition) {
+    if (s->scene.started || s->scene.ignition) {
       if (s->nOpkrAutoScreenOff) {
         // turn on screen when alert is here.
         if (s->awake_timeout == 0 && (s->status == STATUS_DISENGAGED || s->status == STATUS_ALERT || s->status == STATUS_WARNING || (s->scene.alert_text1 != ""))) {
-          set_awake(s, true);
+          handle_display_state(s, &fb, true);
         }
       } else {
-        set_awake(s, true);
+        handle_display_state(s, &fb, true);
       }
     }
 
     if (s->awake_timeout > 0) {
       s->awake_timeout--;
     } else {
-      set_awake(s, false);
+      handle_display_state(s, &fb, false);
     }
 
     // poll for touch events
@@ -174,9 +173,9 @@ int main(int argc, char* argv[]) {
 
     if (touched == 1) {
       if (s->nOpkrAutoScreenOff && s->awake_timeout == 0) {
-        set_awake(s, true);
+        handle_display_state(s, &fb, true);
       } else {
-        set_awake(s, true);
+        handle_display_state(s, &fb, true);
         handle_sidebar_touch(s, touch_x, touch_y);
         handle_vision_touch(s, touch_x, touch_y);
       }
@@ -209,14 +208,14 @@ int main(int argc, char* argv[]) {
 
     ui_draw(s);
     double u2 = millis_since_boot();
-    if (!s->scene.frontview && (u2-u1 > 66)) {
+    if (!s->scene.driver_view && (u2-u1 > 66)) {
       // warn on sub 15fps
       LOGW("slow frame(%llu) time: %.2f", (s->sm)->frame, u2-u1);
     }
-    s->fb->swap();
+    fb.swap();
   }
 
-  set_awake(s, true);
+  handle_display_state(s, &fb, true);
   delete s->sm;
   delete pm;
   return 0;

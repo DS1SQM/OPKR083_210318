@@ -67,7 +67,6 @@ void ui_init(UIState *s) {
   s->status = STATUS_OFFROAD;
 
   s->scene.satelliteCount = -1;
-  read_param(&s->is_metric, "IsMetric");
   read_param(&s->nOpkrAutoScreenOff, "OpkrAutoScreenOff");
   read_param(&s->nOpkrUIBrightness, "OpkrUIBrightness");
   read_param(&s->nOpkrUIVolumeBoost, "OpkrUIVolumeBoost");
@@ -79,8 +78,6 @@ void ui_init(UIState *s) {
   Params().write_db_value("LimitSetSpeed", "0", 1);
   Params().write_db_value("LimitSetSpeedCamera", "0", 1);
   Params().write_db_value("OpkrSafetyCamera", "0", 1);
-
-  s->fb = std::make_unique<FrameBuffer>("ui", 0, true, &s->fb_w, &s->fb_h);
 
   ui_nvg_init(s);
 
@@ -178,6 +175,7 @@ static void update_sockets(UIState *s) {
 
     scene.limitSpeedCamera = scene.controls_state.getLimitSpeedCamera();
     scene.limitSpeedCameraDist = scene.controls_state.getLimitSpeedCameraDist();
+    scene.steerRatio = scene.controls_state.getSteerRatio();
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();
@@ -245,6 +243,7 @@ static void update_sockets(UIState *s) {
   if (sm.updated("deviceState")) {
     scene.deviceState = sm["deviceState"].getDeviceState();
     s->scene.cpuPerc = scene.deviceState.getCpuUsagePercent();
+    s->scene.cpuTemp = scene.deviceState.getCpuTempC()[0];
     s->scene.fanSpeed = scene.deviceState.getFanSpeedPercentDesired();
     auto data = sm["deviceState"].getDeviceState();
     snprintf(scene.ipAddr, sizeof(scene.ipAddr), "%s", data.getIpAddr().cStr());
@@ -315,7 +314,6 @@ static void update_sockets(UIState *s) {
     auto data = sm["lateralPlan"].getLateralPlan();
 
     scene.lateralPlan.laneWidth = data.getLaneWidth();
-    scene.lateralPlan.steerRatio = data.getSteerRatio();
     scene.lateralPlan.dProb = data.getDProb();
     scene.lateralPlan.lProb = data.getLProb();
     scene.lateralPlan.rProb = data.getRProb();
@@ -370,9 +368,10 @@ static void update_alert(UIState *s) {
 
 static void update_params(UIState *s) {
   const uint64_t frame = s->sm->frame;
+  UIScene &scene = s->scene;
 
   if (frame % (5*UI_FREQ) == 0) {
-    read_param(&s->is_metric, "IsMetric");
+    read_param(&scene.is_metric, "IsMetric");
     read_param(&s->is_OpenpilotViewEnabled, "IsOpenpilotViewEnabled");
     read_param(&s->nOpkrUIBrightness, "OpkrUIBrightness");
     read_param(&s->nOpkrUIVolumeBoost, "OpkrUIVolumeBoost");
@@ -380,16 +379,16 @@ static void update_params(UIState *s) {
     read_param(&s->lat_control, "LateralControlMethod");
     read_param(&s->driving_record, "OpkrDrivingRecord");
   } else if (frame % (6*UI_FREQ) == 0) {
-    s->scene.athenaStatus = NET_DISCONNECTED;
+    scene.athenaStatus = NET_DISCONNECTED;
     uint64_t last_ping = 0;
     if (read_param(&last_ping, "LastAthenaPingTime") == 0) {
-      s->scene.athenaStatus = nanos_since_boot() - last_ping < 70e9 ? NET_CONNECTED : NET_ERROR;
+      scene.athenaStatus = nanos_since_boot() - last_ping < 70e9 ? NET_CONNECTED : NET_ERROR;
     }
   }
 }
 
 static void update_vision(UIState *s) {
-  if (!s->vipc_client->connected && s->started) {
+  if (!s->vipc_client->connected && s->scene.started) {
     if (s->vipc_client->connect(false)){
       ui_init_vision(s);
     }
@@ -408,7 +407,7 @@ static void update_vision(UIState *s) {
 }
 
 static void update_status(UIState *s) {
-  if (s->started && s->sm->updated("controlsState")) {
+  if (s->scene.started && s->sm->updated("controlsState")) {
     auto alert_status = s->scene.controls_state.getAlertStatus();
     if (alert_status == cereal::ControlsState::AlertStatus::USER_PROMPT) {
       s->status = STATUS_WARNING;
@@ -421,16 +420,16 @@ static void update_status(UIState *s) {
 
   // Handle onroad/offroad transition
   static bool started_prev = false;
-  if (s->started != started_prev) {
-    if (s->started) {
+  if (s->scene.started != started_prev) {
+    if (s->scene.started) {
       s->status = STATUS_DISENGAGED;
-      s->started_frame = s->sm->frame;
+      s->scene.started_frame = s->sm->frame;
 
       read_param(&s->scene.is_rhd, "IsRHD");
       s->active_app = cereal::UiLayoutState::App::NONE;
       s->sidebar_collapsed = true;
       s->scene.alert_size = cereal::ControlsState::AlertSize::NONE;
-      s->vipc_client = s->scene.frontview ? s->vipc_client_front : s->vipc_client_rear;
+      s->vipc_client = s->scene.driver_view ? s->vipc_client_front : s->vipc_client_rear;
     } else {
       s->status = STATUS_OFFROAD;
       s->active_app = cereal::UiLayoutState::App::HOME;
@@ -439,7 +438,7 @@ static void update_status(UIState *s) {
       s->vipc_client->connected = false;
     }
   }
-  started_prev = s->started;
+  started_prev = s->scene.started;
 }
 
 void ui_update(UIState *s) {

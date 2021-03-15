@@ -86,6 +86,8 @@ class LateralPlanner():
     self.standstill_elapsed_time = 0.0
     self.v_cruise_kph = 0
     self.stand_still = False
+    
+    self.output_scale = 0.0
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -102,6 +104,16 @@ class LateralPlanner():
     self.desired_curvature_rate = 0.0
 
   def update(self, sm, CP):
+    self.v_cruise_kph = sm['controlsState'].vCruise
+    self.stand_still = sm['carState'].standStill
+    lateral_control_method = sm['controlsState'].lateralControlMethod
+    if lateral_control_method == 0:
+      self.output_scale = sm['controlsState'].lateralControlState.pidState.output
+    elif lateral_control_method == 1:
+      self.output_scale = sm['controlsState'].lateralControlState.indiState.output
+    elif lateral_control_method == 2:
+      self.output_scale = sm['controlsState'].lateralControlState.lqrState.output
+  
     v_ego = sm['carState'].vEgo
     active = sm['controlsState'].active
     measured_curvature = sm['controlsState'].curvature

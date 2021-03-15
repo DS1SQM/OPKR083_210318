@@ -131,6 +131,7 @@ typedef struct UIScene {
   float bearingUblox;
 
   int cpuPerc;
+  float cpuTemp;
   bool rightblindspot;
   bool leftblindspot;
   bool leftBlinker;
@@ -145,7 +146,6 @@ typedef struct UIScene {
   float curvature;
   bool steerOverride;
   float output_scale; 
-  float cpu0Temp;
   int batteryPercent;
   bool batteryCharging;
   char batteryStatus[64];
@@ -204,8 +204,6 @@ typedef struct UIScene {
   struct _LateralPlan
   {
     float laneWidth;
-    float steerRatio;
-    //float steerActuatorDelay;
     float steerRateCost;
     int standstillElapsedTime = 0;
 
@@ -252,10 +250,6 @@ typedef struct UIState {
   int awake_timeout;
   float light_sensor, accel_sensor, gyro_sensor;
 
-  bool started;
-  bool ignition;
-  bool is_metric;
-  bool longitudinal_control;
   bool limit_set_speed;
   bool is_speed_over_limit;
   float speed_lim_off;

@@ -165,11 +165,10 @@ class Controls:
 
     self.steerRatio_Max = int(Params().get('SteerRatioMaxAdj')) * 0.1
     self.angle_differ_range = [0, 45]
-    self.steerRatio_range = [self.CP.steerRatio, self.steerRatio_Max] # 가변 SR 범위
+    self.steerRatio_range = [self.CP.steerRatio, self.steerRatio_Max]
     self.new_steerRatio = self.CP.steerRatio
     self.new_steerRatio_prev = self.CP.steerRatio
     self.steerRatio_to_send = 0
-
 
   def auto_enable(self, CS):
     if self.state != State.enabled and CS.vEgo >= 15 * CV.KPH_TO_MS and CS.gearShifter == 2 and self.sm['liveCalibration'].calStatus != Calibration.UNCALIBRATED:
@@ -415,52 +414,42 @@ class Controls:
   def state_control(self, CS):
     """Given the state, this function returns an actuators packet"""
 
-    anglesteer_current = sm['carState'].steeringAngleDeg
-    anglesteer_desire = sm['controlsState'].steeringAngleDesiredDeg 
-    self.v_cruise_kph = sm['controlsState'].vCruise
-    self.stand_still = sm['carState'].standStill    
-    lateral_control_method = sm['controlsState'].lateralControlMethod
+    anglesteer_current = self.sm['carState'].steeringAngleDeg
+    anglesteer_desire = self.sm['controlsState'].steeringAngleDesiredDeg   
 
     if lateral_control_method == 0:
-      self.output_scale = sm['controlsState'].lateralControlState.pidState.output
+      output_scale = self.sm['controlsState'].lateralControlState.pidState.output
     elif lateral_control_method == 1:
-      self.output_scale = sm['controlsState'].lateralControlState.indiState.output
+      output_scale = self.sm['controlsState'].lateralControlState.indiState.output
     elif lateral_control_method == 2:
-      self.output_scale = sm['controlsState'].lateralControlState.lqrState.output
+      output_scale = self.sm['controlsState'].lateralControlState.lqrState.output
 
-    self.live_sr = Params().get('OpkrLiveSteerRatio') == b'1'
-    # 가변 SR
-    if not self.live_sr:
-      self.angle_diff = abs(anglesteer_desire) - abs(anglesteer_current)
-      if abs(self.output_scale) >= 1 and v_ego > 8:
-        self.new_steerRatio_prev = interp(self.angle_diff, self.angle_differ_range, self.steerRatio_range)
+    live_sr = Params().get('OpkrLiveSteerRatio') == b'1'
+
+    if not live_sr:
+      angle_diff = abs(anglesteer_desire) - abs(anglesteer_current)
+      if abs(output_scale) >= 1 and CS.vEgo > 8:
+        self.new_steerRatio_prev = interp(angle_diff, self.angle_differ_range, self.steerRatio_range)
         if self.new_steerRatio_prev > self.new_steerRatio:
           self.new_steerRatio = self.new_steerRatio_prev
       else:
         self.mpc_frame += 1
         if self.mpc_frame % 10 == 0:
           self.new_steerRatio -= 0.1
-          if self.new_steerRatio <= CP.steerRatio:
-            self.new_steerRatio = CP.steerRatio
+          if self.new_steerRatio <= self.CP.steerRatio:
+            self.new_steerRatio = self.CP.steerRatio
           self.mpc_frame = 0
-
-
-    # Update vehicle model
-    x = max(sm['liveParameters'].stiffnessFactor, 0.1)
-    if self.live_sr:
-      sr = max(sm['liveParameters'].steerRatio, 0.1) #Live SR
-    else:
-      sr = max(self.new_steerRatio, 0.1) #가변 SR
-    VM.update_params(x, sr)
-    curvature_factor = VM.curvature_factor(v_ego)
-    measured_curvature = -curvature_factor * math.radians(steering_wheel_angle_deg - steering_wheel_angle_offset_deg) / VM.sR
-    self.steerRatio_to_send = VM.sR
 
     # Update VehicleModel
     params = self.sm['liveParameters']
     x = max(params.stiffnessFactor, 0.1)
-    sr = max(params.steerRatio, 0.1)
+    if live_sr:
+      sr = max(params.steerRatio, 0.1)
+    else:
+     sr = max(self.new_steerRatio, 0.1)
     self.VM.update_params(x, sr)
+    
+    self.steerRatio_to_send = sr
 
     lat_plan = self.sm['lateralPlan']
     long_plan = self.sm['longitudinalPlan']
@@ -623,6 +612,7 @@ class Controls:
     controlsState.limitSpeedCamera = self.sm['longitudinalPlan'].targetSpeedCamera
     controlsState.limitSpeedCameraDist = self.sm['longitudinalPlan'].targetSpeedCameraDist
     controlsState.lateralControlMethod = self.lateral_control_method
+    controlsState.steerRatio = self.steerRatio_to_send
 
     if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
       controlsState.lateralControlState.angleState = lac_log
