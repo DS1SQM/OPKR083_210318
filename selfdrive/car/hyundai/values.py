@@ -51,6 +51,7 @@ class CAR:
   CEED = "KIA CEED 2019"
   CADENZA = "KIA K7 2016-2019"
   CADENZA_HEV = "KIA K7 HEV 2016-2019"
+  SELTOS = "KIA SELTOS 2021"
 
 class Buttons:
   NONE = 0
@@ -110,7 +111,8 @@ if fingerprint_issued_fix: # 핑거인식문제 혹은 다른차량과 핑거프
                    {68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 576: 8, 832: 8, 881: 8, 882: 8, 902: 8, 903: 8, 916: 8, 1040: 8, 1056: 8, 1057: 8, 1078: 4, 1136: 6, 1173: 8, 1265: 4, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1322: 8, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8}], 
     CAR.CEED: [{}],
     CAR.CADENZA: [{}],  
-    CAR.CADENZA_HEV: [{}]
+    CAR.CADENZA_HEV: [{}],
+    CAR.SELTOS: [{}]
   }
 else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
   FINGERPRINTS = {
@@ -358,6 +360,9 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
     }],  
     CAR.CADENZA_HEV: [{
       68: 8, 127: 8, 304: 8, 320: 8, 339: 8, 352: 8, 356: 4, 544: 8, 576: 8, 593: 8, 688: 5, 832: 8, 865: 8, 881: 8, 882: 8, 897: 8, 902: 8, 903: 8, 905: 8, 909: 8, 913: 8, 916: 8, 1040: 8, 1042: 8, 1056: 8, 1057: 8, 1078: 4, 1096: 8, 1102: 8, 1108: 8, 1136: 6, 1138: 5, 1151: 8, 1155: 8, 1156: 8, 1157: 4, 1162: 8, 1164: 8, 1168: 7, 1173: 8, 1180: 8, 1186: 2, 1191: 2, 1210: 8, 1227: 8, 1265: 4, 1268: 8, 1280: 1, 1287: 4, 1290: 8, 1291: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1343: 8, 1345: 8, 1348: 8, 1355: 8, 1363: 8, 1369: 8, 1371: 8, 1378: 8, 1379: 8, 1407: 8, 1419: 8, 1427: 6, 1429: 8, 1430: 8, 1448: 8, 1456: 4, 1470: 8, 1476: 8, 1535: 8
+    }],
+    CAR.SELTOS: [{
+      67: 8, 127: 8, 304: 8, 320: 8, 339: 8, 356: 4, 524: 8, 544: 8, 593: 8, 608: 8, 688: 6, 809: 8, 832: 8, 854: 8, 870: 7, 871: 8, 872: 8, 897: 8, 902: 8, 905: 8, 909: 8, 910: 5, 911: 5, 913: 8, 916: 8, 1040: 8, 1042: 8, 1056: 8, 1057: 8, 1064: 8, 1078: 4, 1102: 8, 1107: 5, 1114: 8, 1136: 8, 1145: 8, 1151: 8, 1155: 8, 1156: 8, 1157: 4, 1162: 8, 1164: 8, 1168: 8, 1170: 8, 1173: 8, 1186: 2, 1191: 2, 1225: 8, 1265: 4, 1280: 8, 1287: 4, 1290: 8, 1292: 8, 1294: 8, 1312: 8, 1322: 8, 1342: 6, 1345: 8, 1348: 8, 1363: 8, 1369: 8, 1379: 8, 1384: 8, 1394: 8, 1407: 8, 1419: 8, 1427: 6, 1446: 8, 1456: 4, 1470: 8, 1485: 8, 1988: 8, 1996: 8, 2000: 8, 2004: 8, 2008: 8, 2012: 8, 2015: 8
     }]
   }
 
@@ -555,10 +560,18 @@ if fingerprint_two:
         b'\xf1\x00DEE MFC  AT EUR LHD 1.00 1.00 99211-Q4000 191211',
       ],
     },
+    CAR.SELTOS: {
+      (Ecu.fwdRadar, 0x7d0, None): [b'\xf1\x8799110Q5100\xf1\000SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         \xf1\xa01.05',],
+      (Ecu.esp, 0x7d1, None): [b'\xf1\x8758910-Q5450\xf1\000SP ESC \t 101\031\t\005 58910-Q5450\xf1\xa01.01',],
+      (Ecu.engine, 0x7e0, None): [b'\xf1\x81616D2051\000\000\000\000\000\000\000\000',],
+      (Ecu.eps, 0x7d4, None): [b'\xf1\000SP2 MDPS C 1.00 1.04 56300Q5200          ',],
+      (Ecu.fwdCamera, 0x7c4, None): [b'\xf1\000SP2 MFC  AT USA LHD 1.00 1.04 99210-Q5000 191114',],
+      (Ecu.transmission, 0x7e1, None): [b'\xf1\x87CZLUB49370612JF7h\xa8y\x87\x99\xa7hv\x99\x97fv\x88\x87x\x89x\x96O\xff\x88\xff\xff\xff.@\xf1\x816V2C2051\000\000\xf1\0006V2B0_C2\000\0006V2C2051\000\000CSP4N20NS3\000\000\000\000',],
+    },
   }
 
 CHECKSUM = {
-  "crc8": [CAR.SANTA_FE, CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV],
+  "crc8": [CAR.SANTA_FE, CAR.SONATA, CAR.PALISADE, CAR.SONATA_HEV, CAR.SELTOS],
   "6B": [CAR.SORENTO, CAR.GENESIS],
 }
 
@@ -576,16 +589,16 @@ FEATURES = {
   "use_elect_ems": {CAR.SONATA_HEV, CAR.SONATA19_HEV, CAR.KONA_EV, CAR.KONA_HEV, CAR.IONIQ_EV, CAR.IONIQ_HEV, CAR.GRANDEUR_HEV, CAR.NEXO,
                     CAR.OPTIMA_HEV, CAR.CADENZA_HEV, CAR.NIRO_EV, CAR.NIRO_HEV}, # 전기차 or 하이브리드 차량 넣어주세요.(가속페달관련)
   # send LFA MFA message for new HKG models
-  "send_lfahda_mfa": {CAR.KONA_HEV}, #차량의 LFA, HDA아이콘이 켜지게 하려면 여기다가 본인 차종을 넣으세요.
+  "send_lfahda_mfa": {CAR.KONA_HEV, CAR.SELTOS}, #차량의 LFA, HDA아이콘이 켜지게 하려면 여기다가 본인 차종을 넣으세요.
   "has_scc13": set([]),
   "has_scc14": set([]),
   # these cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
-  "use_fca": {CAR.SONATA, CAR.ELANTRA, CAR.ELANTRA_GT_I30, CAR.PALISADE, CAR.GENESIS_G70, CAR.KONA_HEV}, # 전방추돌관련 계기판 오류가 발생할 경우 여기다 본인 차종을 넣어보세요.
+  "use_fca": {CAR.SONATA, CAR.ELANTRA, CAR.ELANTRA_GT_I30, CAR.PALISADE, CAR.GENESIS_G70, CAR.KONA_HEV, CAR.SELTOS}, # 전방추돌관련 계기판 오류가 발생할 경우 여기다 본인 차종을 넣어보세요.
 
   "use_bsm": {CAR.SONATA, CAR.PALISADE, CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80, CAR.GENESIS_G90, CAR.NEXO,
               CAR.KONA, CAR.SONATA_HEV, CAR.SONATA19_HEV, CAR.KONA_EV, CAR.KONA_HEV, CAR.IONIQ_EV, CAR.IONIQ_HEV, CAR.GRANDEUR_HEV,
               CAR.OPTIMA_HEV, CAR.CADENZA_HEV, CAR.NIRO_EV, CAR.NIRO_HEV, CAR.ELANTRA, CAR.KONA, CAR.ELANTRA_GT_I30, CAR.CADENZA, CAR.GRANDEUR,
-              CAR.OPTIMA, CAR.SONATA19, CAR.VELOSTER}, # 후측방 감지 BSM 옵션이 있는 차량의 경우 넣어주세요.
+              CAR.OPTIMA, CAR.SONATA19, CAR.VELOSTER, CAR.SELTOS}, # 후측방 감지 BSM 옵션이 있는 차량의 경우 넣어주세요.
 }
 
 DBC = {
@@ -624,6 +637,7 @@ DBC = {
   CAR.CEED: dbc_dict('hyundai_kia_generic', None),
   CAR.CADENZA: dbc_dict('hyundai_kia_generic', None),
   CAR.CADENZA_HEV: dbc_dict('hyundai_kia_generic', None),
+  CAR.SELTOS: dbc_dict('hyundai_kia_generic', None),
 }
 
 STEER_THRESHOLD = 150

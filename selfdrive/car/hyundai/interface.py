@@ -128,6 +128,9 @@ class CarInterface(CarInterfaceBase):
     elif candidate in [CAR.CADENZA, CAR.CADENZA_HEV]:
       ret.mass = 1640. + STD_CARGO_KG
       ret.wheelbase = 2.845
+    elif candidate == CAR.SELTOS:
+      ret.mass = 1310. + STD_CARGO_KG
+      ret.wheelbase = 2.6
 
     if int(params.get('LateralControlMethod')) == 0:
       ret.lateralTuning.pid.kf = PidKf

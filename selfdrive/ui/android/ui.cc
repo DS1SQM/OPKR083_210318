@@ -5,10 +5,12 @@
 
 #include <algorithm>
 
+#include "common/framebuffer.h"
 #include "common/util.h"
 #include "common/params.h"
-#include "common/touch.h"
 #include "common/swaglog.h"
+#include "common/touch.h"
+#include "common/watchdog.h"
 
 #include "ui.hpp"
 #include "paint.hpp"
@@ -26,10 +28,11 @@ static void ui_set_brightness(UIState *s, int brightness) {
   }
 }
 
-static void set_awake(UIState *s, bool awake) {
-  if (awake) {
+static void handle_display_state(UIState *s, bool awake) {
+static void handle_display_state(UIState *s, FrameBuffer *fb, bool user_input) {
+  if (user_input) {
     // 30 second timeout
-    s->awake_timeout = (s->nOpkrAutoScreenOff && s->started)? s->nOpkrAutoScreenOff*60*UI_FREQ : 30*UI_FREQ;
+    s->awake_timeout = (s->nOpkrAutoScreenOff && s->scene.started)? s->nOpkrAutoScreenOff*60*UI_FREQ : 30*UI_FREQ;
   }
   if (s->awake != awake) {
     s->awake = awake;
@@ -48,9 +51,9 @@ static void set_awake(UIState *s, bool awake) {
 }
 
 static void handle_vision_touch(UIState *s, int touch_x, int touch_y) {
-  if (s->started && (touch_x >= s->viz_rect.x - bdr_s)
+  if (s->scene.started && (touch_x >= s->viz_rect.x - bdr_s)
       && (s->active_app != cereal::UiLayoutState::App::SETTINGS)) {
-    if (!s->scene.frontview) {
+    if (!s->scene.driver_view) {
       s->sidebar_collapsed = !s->sidebar_collapsed;
     } else {
       Params().write_db_value("IsDriverViewEnabled", "0", 1);
@@ -63,7 +66,7 @@ static void handle_sidebar_touch(UIState *s, int touch_x, int touch_y) {
     if (settings_btn.ptInRect(touch_x, touch_y)) {
       s->active_app = cereal::UiLayoutState::App::SETTINGS;
     } else if (home_btn.ptInRect(touch_x, touch_y)) {
-      if (s->started) {
+      if (s->scene.started) {
         s->active_app = cereal::UiLayoutState::App::NONE;
         s->sidebar_collapsed = true;
       } else {
@@ -95,43 +98,44 @@ static void update_offroad_layout_state(UIState *s, PubMaster *pm) {
 
 int main(int argc, char* argv[]) {
   setpriority(PRIO_PROCESS, 0, -14);
-  SLSound sound;
 
+  SLSound sound;
   UIState uistate = {};
   UIState *s = &uistate;
+  FrameBuffer fb = FrameBuffer("ui", 0, true, &s->fb_w, &s->fb_h);
+
   ui_init(s);
   s->sound = &sound;
 
   TouchState touch = {0};
   touch_init(&touch);
-  set_awake(s, true);
+  handle_display_state(s, &fb, true);
 
   PubMaster *pm = new PubMaster({"offroadLayout"});
 
   // light sensor scaling and volume params
-  const bool LEON = util::read_file("/proc/cmdline").find("letv") != std::string::npos;
-
   float brightness_b = 0, brightness_m = 0;
   int result = read_param(&brightness_b, "BRIGHTNESS_B", true);
   result += read_param(&brightness_m, "BRIGHTNESS_M", true);
   if (result != 0) {
-    brightness_b = LEON ? 10.0 : 5.0;
-    brightness_m = LEON ? 2.6 : 1.3;
+    brightness_b = 10.0;
+    brightness_m = 2.6;
     write_param_float(brightness_b, "BRIGHTNESS_B", true);
     write_param_float(brightness_m, "BRIGHTNESS_M", true);
   }
   float smooth_brightness = brightness_b;
 
-  const int MIN_VOLUME = LEON ? 12 : 9;
-  const int MAX_VOLUME = LEON ? 15 : 12;
+  const int MIN_VOLUME = 12;
+  const int MAX_VOLUME = 15;
   s->sound->setVolume(MIN_VOLUME);
 
   if (s->nOpkrAutoScreenOff && !s->awake) {
-    set_awake(s, true);
+    handle_display_state(s, &fb, true);
   }
 
   while (!do_exit) {
-    if (!s->started || !s->vipc_client->connected) {
+    watchdog_kick();
+    if (!s->scene.started) {
       util::sleep_for(50);
     }
     double u1 = millis_since_boot();

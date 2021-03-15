@@ -79,37 +79,13 @@ class LateralPlanner():
     self.t_idxs = np.arange(TRAJECTORY_SIZE)
     self.y_pts = np.zeros(TRAJECTORY_SIZE)
 
-    self.mpc_frame = 0
-
     self.lane_change_adjust = [0.12, 0.19, 0.9, 1.4]
     self.lane_change_adjust_vel = [8.3, 16, 22, 30]
     self.lane_change_adjust_new = 0.0
 
-    self.steerRatio_Max = int(Params().get('SteerRatioMaxAdj')) * 0.1
-    self.angle_differ_range = [0, 45]
-    self.steerRatio_range = [CP.steerRatio, self.steerRatio_Max] # 가변 SR 범위
-    self.new_steerRatio = CP.steerRatio
-    self.new_steerRatio_prev = CP.steerRatio
-
-    #self.steer_actuator_delay_range = [0.1, CP.steerActuatorDelay]
-    #self.steer_actuator_delay_vel = [3, 13]
-    #self.new_steer_actuator_delay = CP.steerActuatorDelay
-
     self.standstill_elapsed_time = 0.0
-    self.output_scale = 0.0
     self.v_cruise_kph = 0
-    self.steerRatio_to_send = 0
     self.stand_still = False
-
-  # Atom's steer angle limitation
-  def limit_ctrl(self, value, limit, offset ):
-      p_limit = offset + limit
-      m_limit = offset - limit
-      if value > p_limit:
-          value = p_limit
-      elif  value < m_limit:
-          value = m_limit
-      return value
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -122,59 +98,13 @@ class LateralPlanner():
     self.cur_state[0].psi = 0.0
     self.cur_state[0].curvature = 0.0
 
-    self.angle_steers_des = 0.0
-    self.angle_steers_des_mpc = 0.0
-    self.angle_steers_des_time = 0.0
+    self.desired_curvature = 0.0
+    self.desired_curvature_rate = 0.0
 
-  def update(self, sm, CP, VM):
+  def update(self, sm, CP):
     v_ego = sm['carState'].vEgo
     active = sm['controlsState'].active
-    steering_wheel_angle_offset_deg = sm['liveParameters'].angleOffsetDeg
-    steering_wheel_angle_deg = sm['carState'].steeringAngleDeg
-
-
-    anglesteer_current = sm['carState'].steeringAngleDeg
-    anglesteer_desire = sm['controlsState'].steeringAngleDesiredDeg 
-    self.v_cruise_kph = sm['controlsState'].vCruise
-    self.stand_still = sm['carState'].standStill    
-    lateral_control_method = sm['controlsState'].lateralControlMethod
-
-    if lateral_control_method == 0:
-      self.output_scale = sm['controlsState'].lateralControlState.pidState.output
-    elif lateral_control_method == 1:
-      self.output_scale = sm['controlsState'].lateralControlState.indiState.output
-    elif lateral_control_method == 2:
-      self.output_scale = sm['controlsState'].lateralControlState.lqrState.output
-
-    #self.new_steer_actuator_delay = interp(v_ego, self.steer_actuator_delay_vel, self.steer_actuator_delay_range)
-
-    self.live_sr = Params().get('OpkrLiveSteerRatio') == b'1'
-    # 가변 SR
-    if not self.live_sr:
-      self.angle_diff = abs(anglesteer_desire) - abs(anglesteer_current)
-      if abs(self.output_scale) >= 1 and v_ego > 8:
-        self.new_steerRatio_prev = interp(self.angle_diff, self.angle_differ_range, self.steerRatio_range)
-        if self.new_steerRatio_prev > self.new_steerRatio:
-          self.new_steerRatio = self.new_steerRatio_prev
-      else:
-        self.mpc_frame += 1
-        if self.mpc_frame % 10 == 0:
-          self.new_steerRatio -= 0.1
-          if self.new_steerRatio <= CP.steerRatio:
-            self.new_steerRatio = CP.steerRatio
-          self.mpc_frame = 0
-
-
-    # Update vehicle model
-    x = max(sm['liveParameters'].stiffnessFactor, 0.1)
-    if self.live_sr:
-      sr = max(sm['liveParameters'].steerRatio, 0.1) #Live SR
-    else:
-      sr = max(self.new_steerRatio, 0.1) #가변 SR
-    VM.update_params(x, sr)
-    curvature_factor = VM.curvature_factor(v_ego)
-    measured_curvature = -curvature_factor * math.radians(steering_wheel_angle_deg - steering_wheel_angle_offset_deg) / VM.sR
-    self.steerRatio_to_send = VM.sR
+    measured_curvature = sm['controlsState'].curvature
 
     md = sm['modelV2']
     self.LP.parse_model(sm['modelV2'], sm, v_ego)
@@ -252,8 +182,8 @@ class LateralPlanner():
       self.LP.lll_prob *= self.lane_change_ll_prob
       self.LP.rll_prob *= self.lane_change_ll_prob
     d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
-    y_pts = np.interp(v_ego * self.t_idxs[:MPC_N+1], np.linalg.norm(d_path_xyz, axis=1), d_path_xyz[:,1])
-    heading_pts = np.interp(v_ego * self.t_idxs[:MPC_N+1], np.linalg.norm(self.path_xyz, axis=1), self.plan_yaw)
+    y_pts = np.interp(v_ego * self.t_idxs[:MPC_N + 1], np.linalg.norm(d_path_xyz, axis=1), d_path_xyz[:,1])
+    heading_pts = np.interp(v_ego * self.t_idxs[:MPC_N + 1], np.linalg.norm(self.path_xyz, axis=1), self.plan_yaw)
     self.y_pts = y_pts
 
     assert len(y_pts) == MPC_N + 1
@@ -267,38 +197,22 @@ class LateralPlanner():
     self.cur_state.x = 0.0
     self.cur_state.y = 0.0
     self.cur_state.psi = 0.0
-    self.cur_state.curvature = interp(DT_MDL, self.t_idxs[:MPC_N+1], self.mpc_solution.curvature)
+    self.cur_state.curvature = interp(DT_MDL, self.t_idxs[:MPC_N + 1], self.mpc_solution.curvature)
 
     # TODO this needs more thought, use .2s extra for now to estimate other delays
     delay = CP.steerActuatorDelay + .2
     current_curvature = self.mpc_solution.curvature[0]
-    psi = interp(delay, self.t_idxs[:MPC_N+1], self.mpc_solution.psi)
+    psi = interp(delay, self.t_idxs[:MPC_N + 1], self.mpc_solution.psi)
     next_curvature_rate = self.mpc_solution.curvature_rate[0]
 
     # MPC can plan to turn the wheel and turn back before t_delay. This means
     # in high delay cases some corrections never even get commanded. So just use
     # psi to calculate a simple linearization of desired curvature
-    curvature_diff_from_psi = psi/(max(v_ego, 1e-1) * delay) - current_curvature
-    next_curvature = current_curvature + 2*curvature_diff_from_psi
+    curvature_diff_from_psi = psi / (max(v_ego, 1e-1) * delay) - current_curvature
+    next_curvature = current_curvature + 2 * curvature_diff_from_psi
 
-    # reset to current steer angle if not active or overriding
-    if active:
-      curvature_desired = next_curvature
-      desired_curvature_rate = next_curvature_rate
-    else:
-      curvature_desired = measured_curvature
-      desired_curvature_rate = 0.0
-
-    # negative sign, controls uses different convention
-    self.desired_steering_wheel_angle_deg = -float(math.degrees(curvature_desired * VM.sR)/curvature_factor) + steering_wheel_angle_offset_deg
-    self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
-
-    # Atom's steer angle limitation
-    if v_ego < 9 and int(Params().get('UserOption3')) == 1: # 32.4km/h
-      xp = [4,9]  # 14.4km/h ~ 32.4km/h
-      fp2 = [1,3]  # 1도 ~ 3도
-      limit_steers = interp(v_ego, xp, fp2)
-      self.desired_steering_wheel_angle_deg = self.limit_ctrl(self.desired_steering_wheel_angle_deg, limit_steers, sm['carState'].steeringAngleDeg)
+    self.desired_curvature = next_curvature
+    self.desired_curvature_rate = next_curvature_rate
 
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution.curvature)
@@ -319,24 +233,21 @@ class LateralPlanner():
   def publish(self, sm, pm):
     plan_solution_valid = self.solution_invalid_cnt < 3
     plan_send = messaging.new_message('lateralPlan')
-    plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'liveParameters', 'modelV2'])
+    plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'modelV2'])
     plan_send.lateralPlan.laneWidth = float(self.LP.lane_width)
     plan_send.lateralPlan.dPathPoints = [float(x) for x in self.y_pts]
     plan_send.lateralPlan.lProb = float(self.LP.lll_prob)
     plan_send.lateralPlan.rProb = float(self.LP.rll_prob)
     plan_send.lateralPlan.dProb = float(self.LP.d_prob)
 
-    plan_send.lateralPlan.steeringAngleDeg = float(self.desired_steering_wheel_angle_deg)
-    plan_send.lateralPlan.steeringRateDeg = float(self.desired_steering_wheel_angle_rate_deg)
-    plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetAverageDeg)
+    plan_send.lateralPlan.curvature = float(self.desired_curvature)
+    plan_send.lateralPlan.curvatureRate = float(self.desired_curvature_rate)
+
     plan_send.lateralPlan.mpcSolutionValid = bool(plan_solution_valid)
 
     plan_send.lateralPlan.desire = self.desire
     plan_send.lateralPlan.laneChangeState = self.lane_change_state
     plan_send.lateralPlan.laneChangeDirection = self.lane_change_direction
-
-    plan_send.lateralPlan.steerRatio = float(self.steerRatio_to_send)
-    #plan_send.lateralPlan.steerActuatorDelay = self.new_steer_actuator_delay
 
     plan_send.lateralPlan.steerRateCost = self.steer_rate_cost
     plan_send.lateralPlan.outputScale = self.output_scale
@@ -354,9 +265,9 @@ class LateralPlanner():
 
     if LOG_MPC:
       dat = messaging.new_message('liveMpc')
-      dat.liveMpc.x = list(self.mpc_solution[0].x)
-      dat.liveMpc.y = list(self.mpc_solution[0].y)
-      dat.liveMpc.psi = list(self.mpc_solution[0].psi)
-      dat.liveMpc.tire_angle = list(self.mpc_solution[0].tire_angle)
-      dat.liveMpc.cost = self.mpc_solution[0].cost
+      dat.liveMpc.x = list(self.mpc_solution.x)
+      dat.liveMpc.y = list(self.mpc_solution.y)
+      dat.liveMpc.psi = list(self.mpc_solution.psi)
+      dat.liveMpc.curvature = list(self.mpc_solution.curvature)
+      dat.liveMpc.cost = self.mpc_solution.cost
       pm.send('liveMpc', dat)

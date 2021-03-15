@@ -310,9 +310,6 @@ struct CarControl {
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
 
-  applySteer @8 :Float32;
-  applyAccel @9 :Float32;
-
   struct Actuators {
     # range from 0.0 - 1.0
     gas @0: Float32;

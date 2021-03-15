@@ -21,7 +21,6 @@
 
 #include "common/mat.h"
 #include "common/visionimg.h"
-#include "common/framebuffer.h"
 #include "common/modeldata.h"
 #include "common/params.h"
 #include "common/glutil.h"
@@ -84,7 +83,7 @@ typedef enum UIStatus {
 } UIStatus;
 
 static std::map<UIStatus, NVGcolor> bg_colors = {
-#ifdef QCOM
+#ifndef QT_GUI_LIB
   {STATUS_OFFROAD, nvgRGBA(0x07, 0x23, 0x39, 0xf1)},
 #else
   {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
@@ -106,14 +105,11 @@ typedef struct {
 
 typedef struct UIScene {
 
-  float mpc_x[50];
-  float mpc_y[50];
-
   mat3 view_from_calib;
   bool world_objects_visible;
 
   bool is_rhd;
-  bool frontview;
+  bool driver_view;
 
   int lead_status;
   float lead_d_rel, lead_v_rel;
@@ -193,6 +189,10 @@ typedef struct UIScene {
   // lead
   vertex_data lead_vertices[2];
 
+  float light_sensor, accel_sensor, gyro_sensor;
+  bool started, ignition, is_metric, longitudinal_control;
+  uint64_t started_frame;
+
   struct _LiveParams
   {
     float angleOffset;
@@ -224,7 +224,6 @@ typedef struct UIState {
   VisionBuf * last_frame;
 
   // framebuffer
-  std::unique_ptr<FrameBuffer> fb;
   int fb_w, fb_h;
 
   // NVG
@@ -269,8 +268,6 @@ typedef struct UIState {
   int nOpkrBlindSpotDetect;
   int lat_control;
   int driving_record;
-
-  uint64_t started_frame;
 
   bool sidebar_collapsed;
   Rect video_rect, viz_rect;
