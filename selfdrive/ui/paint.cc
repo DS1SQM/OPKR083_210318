@@ -436,7 +436,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
   const int SET_SPEED_NA = 255;
   float maxspeed = s->scene.controls_state.getVCruise();
   const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA && s->scene.controls_state.getEnabled();
-  if (is_cruise_set && !s->is_metric) { maxspeed *= 0.6225; }
+  if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
 
   int viz_max_o = 184; //offset value to move right
   const Rect rect = {s->viz_rect.x + (bdr_s), int(s->viz_rect.y + (bdr_s)), 184+viz_max_o, 202};
@@ -455,7 +455,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 
 static void ui_draw_vision_cruise_speed(UIState *s) {
   float cruise_speed = s->scene.vSetDis;
-  if (!s->is_metric) { cruise_speed *= 0.621371; }
+  if (!s->scene.is_metric) { cruise_speed *= 0.621371; }
   s->is_speed_over_limit = s->scene.limitSpeedCamera > 29 && ((s->scene.limitSpeedCamera+round(s->scene.limitSpeedCamera*0.01*s->speed_lim_off))+1 < s->scene.car_state.getVEgo()*3.6);
   const Rect rect = {s->viz_rect.x + (bdr_s), int(s->viz_rect.y + (bdr_s)), 184, 202};
 
@@ -878,7 +878,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
         val_color = nvgRGBA(255, 0, 0, 200);
       }
       // lead car relative speed is always in meters
-      if (s->is_metric) {
+      if (s->scene.is_metric) {
          snprintf(val_str, sizeof(val_str), "%d", (int)(scene->lead_data[0].getVRel() * 3.6 + 0.5));
       } else {
          snprintf(val_str, sizeof(val_str), "%d", (int)(scene->lead_data[0].getVRel() * 2.2374144 + 0.5));
@@ -886,7 +886,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
-    if (s->is_metric) {
+    if (s->scene.is_metric) {
       snprintf(uom_str, sizeof(uom_str), "km/h");;
     } else {
       snprintf(uom_str, sizeof(uom_str), "mi/h");

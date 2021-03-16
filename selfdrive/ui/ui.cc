@@ -311,7 +311,6 @@ static void update_sockets(UIState *s) {
   }
 #endif
   scene.started = scene.deviceState.getStarted() || scene.driver_view;
-}
 
   if (sm.updated("lateralPlan")) {
     scene.lateral_plan = sm["lateralPlan"].getLateralPlan();
