@@ -320,7 +320,6 @@ static void update_sockets(UIState *s) {
     scene.lateralPlan.dProb = data.getDProb();
     scene.lateralPlan.lProb = data.getLProb();
     scene.lateralPlan.rProb = data.getRProb();
-    scene.lateralPlan.angleOffset = data.getAngleOffsetDeg();
     scene.lateralPlan.steerRateCost = data.getSteerRateCost();
     scene.lateralPlan.standstillElapsedTime = data.getStandstillElapsedTime();
   }

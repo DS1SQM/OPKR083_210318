@@ -141,7 +141,7 @@ static void draw_panda_metric(UIState *s) {
   if (s->scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
     panda_severity = 2;
     panda_message = "차량\n연결안됨";
-  } else if (s->started) {
+  } else if (s->scene.started) {
   	if (s->scene.satelliteCount <= 0) {
   	  panda_severity = 0;
   	  panda_message = "차량\n연결됨";
