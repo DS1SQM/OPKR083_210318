@@ -30,15 +30,6 @@ if [ ! -f "/data/KRSet" ]; then
     /usr/bin/touch /data/KRSet
 fi
 
-if [ ! -f "/data/ssh_enabled" ]; then
-    sleep 3
-    mount -o remount,rw /system
-    cp -f /data/openpilot/selfdrive/assets/addon/ssh/* /system/comma/home/.ssh/
-    chmod 600 /system/comma/home/.ssh/*
-    /usr/bin/touch /data/ssh_enabled
-    mount -o remount,r /system
-fi
-
 export PASSIVE="0"
 exec ./launch_chffrplus.sh
 

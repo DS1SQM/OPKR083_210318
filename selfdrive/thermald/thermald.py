@@ -187,7 +187,7 @@ def thermald_thread():
 
   pandaState_timeout = int(1000 * 2.5 * DT_TRML)  # 2.5x the expected pandaState frequency
   pandaState_sock = messaging.sub_sock('pandaState', timeout=pandaState_timeout)
-  location_sock = messaging.sub_sock('gpsLocation')
+  location_sock = messaging.sub_sock('gpsLocationExternal')
   managerState_sock = messaging.sub_sock('managerState', conflate=True)
 
   fan_speed = 0
@@ -544,7 +544,7 @@ def thermald_thread():
       cloudlog.event("STATUS_PACKET",
                      count=count,
                      pandaState=(pandaState.to_dict() if pandaState else None),
-                     location=(location.gpsLocation.to_dict() if location else None),
+                     location=(location.gpsLocationExternal.to_dict() if location else None),
                      deviceState=msg.to_dict())
 
     count += 1

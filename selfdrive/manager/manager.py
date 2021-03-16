@@ -36,7 +36,7 @@ def manager_init(spinner=None):
     ("RecordFront", "0"),
     ("HasAcceptedTerms", "0"),
     ("HasCompletedSetup", "0"),
-    ("IsUploadRawEnabled", "0"),
+    ("IsUploadRawEnabled", "1"),
     ("IsLdwEnabled", "1"),
     ("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')),
     ("OpenpilotEnabledToggle", "1"),
@@ -255,9 +255,9 @@ def manager_thread(spinner=None):
     ensure_running(managed_processes.values(), started, driverview, not_run)
 
     # trigger an update after going offroad
-    #if started_prev and not started and 'updated' in managed_processes:
-      #os.sync()
-      #managed_processes['updated'].signal(signal.SIGHUP)
+    if started_prev and not started and 'updated' in managed_processes:
+      os.sync()
+      managed_processes['updated'].signal(signal.SIGHUP)
 
     started_prev = started
 
