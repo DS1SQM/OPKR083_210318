@@ -145,6 +145,7 @@ class Controls:
     self.sm['driverMonitoringState'].events = []
     self.sm['driverMonitoringState'].awarenessStatus = 1.
     self.sm['driverMonitoringState'].faceDetected = False
+    self.sm['liveParameters'].valid = True
 
     self.startup_event = get_startup_event(car_recognized, controller_available)
 
@@ -414,16 +415,12 @@ class Controls:
 
   def state_control(self, CS):
     """Given the state, this function returns an actuators packet"""
+    lat_plan = self.sm['lateralPlan']
+    long_plan = self.sm['longitudinalPlan']
 
     anglesteer_current = CS.steeringAngleDeg
-    anglesteer_desire = self.sm['controlsState'].steeringAngleDesiredDeg   
-
-    if lateral_control_method == 0:
-      output_scale = self.sm['controlsState'].lateralControlState.pidState.output
-    elif lateral_control_method == 1:
-      output_scale = self.sm['controlsState'].lateralControlState.indiState.output
-    elif lateral_control_method == 2:
-      output_scale = self.sm['controlsState'].lateralControlState.lqrState.output
+    anglesteer_desire = lat_plan.steerAngleDesireDeg   
+    output_scale = lat_plan.outputScale
 
     live_sr = Params().get('OpkrLiveSteerRatio') == b'1'
 
@@ -451,9 +448,6 @@ class Controls:
     self.VM.update_params(x, sr)
     
     self.steerRatio_to_send = sr
-
-    lat_plan = self.sm['lateralPlan']
-    long_plan = self.sm['longitudinalPlan']
 
     actuators = car.CarControl.Actuators.new_message()
 
