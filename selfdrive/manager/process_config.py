@@ -6,7 +6,7 @@ from common.params import Params
 
 WEBCAM = os.getenv("WEBCAM") is not None
 
-EnableLogger = int(Params().get('OpkrEnableLogger')) == 1
+EnableLogger = Params().get('OpkrEnableLogger') == b'1'
 
 if EnableLogger:
   procs = [
