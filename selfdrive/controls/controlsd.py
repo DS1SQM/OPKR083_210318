@@ -415,7 +415,7 @@ class Controls:
   def state_control(self, CS):
     """Given the state, this function returns an actuators packet"""
 
-    anglesteer_current = self.sm['carState'].steeringAngleDeg
+    anglesteer_current = CS.steeringAngleDeg
     anglesteer_desire = self.sm['controlsState'].steeringAngleDesiredDeg   
 
     if lateral_control_method == 0:
