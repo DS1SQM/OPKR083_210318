@@ -519,12 +519,12 @@ struct ControlsState @0x97ff69c53601abf1 {
   cumLagMs @15 :Float32;
   canErrorCounter @57 :UInt32;
 
-  alertTextMsg1  @60 :Text;
-  alertTextMsg2  @61 :Text;
-  lateralControlMethod  @62 :UInt8;
-  limitSpeedCamera @63 :Float32;
-  limitSpeedCameraDist @64 :Float32;
-  steerRatio @65 :Float32;
+  alertTextMsg1  @59 :Text;
+  alertTextMsg2  @60 :Text;
+  lateralControlMethod  @61 :UInt8;
+  limitSpeedCamera @62 :Float32;
+  limitSpeedCameraDist @63 :Float32;
+  steerRatio @64 :Float32;
 
   lateralControlState :union {
     indiState @52 :LateralINDIState;
