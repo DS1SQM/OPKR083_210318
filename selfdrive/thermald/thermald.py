@@ -521,8 +521,8 @@ def thermald_thread():
     manager_state = messaging.recv_one_or_none(managerState_sock)
     if manager_state is not None:
       ui_running = "ui" in (p.name for p in manager_state.managerState.processes if p.running)
-      if ui_running_prev and not ui_running:
-        HARDWARE.set_screen_brightness(20)
+      #if ui_running_prev and not ui_running:
+        #HARDWARE.set_screen_brightness(20)
       ui_running_prev = ui_running
 
     msg.deviceState.chargingError = current_filter.x > 0. and msg.deviceState.batteryPercent < 90  # if current is positive, then battery is being discharged
