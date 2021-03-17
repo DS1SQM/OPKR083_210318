@@ -367,7 +367,7 @@ else: # 핑거 프린트 이슈 없는 차량은 이곳에 넣으세요.
   }
 
 # Don't use these fingerprints for fingerprinting, they are still used for ECU detection
-IGNORED_FINGERPRINTS = [CAR.VELOSTER, CAR.GENESIS_G70, CAR.KONA]
+IGNORED_FINGERPRINTS = [CAR.VELOSTER, CAR.GENESIS_G70, CAR.KONA, CAR.CEED, CAR.SELTOS]
 
 if fingerprint_two:
   FW_VERSIONS = {  #핑거프린트2.0부분, 차량 미인식으로 대시캠모드로 동작시 개발자메뉴에서 핑거프린트2.0 활성화 옵션을 끄고 위쪽 핑거프린트1.0에 본인차량 핑거프린트가 들어가 있는지 확인해보세요.

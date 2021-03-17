@@ -195,11 +195,9 @@ int main(int argc, char* argv[]) {
 
     // set brightness
     if (s->nOpkrUIBrightness == 0) {
-    float clipped_brightness = (s->light_sensor*brightness_m) + brightness_b;
-    if (clipped_brightness > 512) clipped_brightness = 512;
-    smooth_brightness = clipped_brightness * 0.01 + smooth_brightness * 0.99;
-    if (smooth_brightness > 255) smooth_brightness = 255;
-    ui_set_brightness(s, (int)smooth_brightness);
+      float clipped_brightness = fmin(512, (s->scene.light_sensor*brightness_m) + brightness_b);
+      smooth_brightness = fmin(255, clipped_brightness * 0.01 + smooth_brightness * 0.99);
+      ui_set_brightness(s, (int)smooth_brightness);
     } else {
       ui_set_brightness(s, (int)(255*s->nOpkrUIBrightness*0.01));
     }
