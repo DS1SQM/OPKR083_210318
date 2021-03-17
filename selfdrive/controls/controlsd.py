@@ -432,7 +432,7 @@ class Controls:
           self.new_steerRatio = self.new_steerRatio_prev
       else:
         self.mpc_frame += 1
-        if self.mpc_frame % 10 == 0:
+        if self.mpc_frame % 100 == 0:
           self.new_steerRatio -= 0.1
           if self.new_steerRatio <= self.CP.steerRatio:
             self.new_steerRatio = self.CP.steerRatio
