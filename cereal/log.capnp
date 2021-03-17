@@ -803,15 +803,18 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   laneChangeState @18 :LaneChangeState;
   laneChangeDirection @19 :LaneChangeDirection;
 
-  curvature @22 :Float32; # rad
-  curvatureRate @23 :Float32; # rad/s
+  # curvature is in rad/m
+  curvature @22 :Float32;
+  curvatureRate @23 :Float32;
+  rawCurvature @24 :Float32;
+  rawCurvatureRate @25 :Float32;
 
-  outputScale @24 :Float32;
-  steerRateCost @25 :Float32;
-  standstillElapsedTime @26 :Float32;
-  vCruiseSet @27 :Float32;
-  vCurvature @28 :Float32;
-  steerAngleDesireDeg @29 :Float32;
+  outputScale @26 :Float32;
+  steerRateCost @27 :Float32;
+  standstillElapsedTime @28 :Float32;
+  vCruiseSet @29 :Float32;
+  vCurvature @30 :Float32;
+  steerAngleDesireDeg @31 :Float32;
 
   enum Desire {
     none @0;
@@ -1320,7 +1323,6 @@ struct Event {
     liveTracks @16 :List(LiveTracks);
     sendcan @17 :List(CanData);
     liveCalibration @19 :LiveCalibrationData;
-    gpsLocation @21 :GpsLocationData;
     carState @22 :Car.CarState;
     carControl @23 :Car.CarControl;
     longitudinalPlan @24 :LongitudinalPlan;
@@ -1394,5 +1396,6 @@ struct Event {
     orbFeaturesSummaryDEPRECATED @58 :Legacy.OrbFeaturesSummary;
     featuresDEPRECATED @10 :Legacy.CalibrationFeatures;
     kalmanOdometryDEPRECATED @65 :Legacy.KalmanOdometry;
+    gpsLocationDEPRECATED @21 :GpsLocationData;
   }
 }
